@@ -3,8 +3,7 @@ BRANCH=master
 
 #YTI common libraries
 GENERIC_COMPONENTS="yti-spring-security
-		    yti-spring-migration
-            yti-spring-mq"
+		    yti-spring-migration"
 #YTI service components
 COMPONENT_LIST="yti-docker-java-base
             yti-postgres
