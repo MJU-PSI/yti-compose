@@ -27,8 +27,8 @@ yti-postgres
 #yti-fuseki = yti-datamodel-database
 termedComponents="termed-api"
 
-YTI_REPO="https://github.com/VRK-YTI/"
-TERMED_REPO="https://github.com/THLfi/"
+YTI_REPO="https://github.com/goraresult/"
+TERMED_REPO="https://github.com/goraresult/"
 
 #clone given repository from git with given branch or master
 clone_component_from_git () {

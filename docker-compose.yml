@@ -67,6 +67,7 @@ services:
      - "5432:5432"
     volumes:
      - /data/logs/yti-postgres:/data/logs/yti-postgres:Z
+     - /data/postgres/data:/var/lib/postgresql/data
     command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres
     environment: 
       # do not require password in local environment
@@ -337,6 +338,7 @@ services:
      - "3030:3030"
     volumes:
      - /data/logs/yti-fuseki:/fuseki/logs:Z
+     - /data/fuseki:/fuseki/databases
     networks:
      - yti-network
 
