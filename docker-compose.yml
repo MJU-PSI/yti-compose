@@ -70,8 +70,7 @@ services:
      - /data/postgres/data:/var/lib/postgresql/data
     command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres
     environment: 
-      # do not require password in local environment
-      POSTGRES_HOST_AUTH_METHOD: trust
+     - POSTGRES_PASSWORD
     networks:
      - yti-network
 
