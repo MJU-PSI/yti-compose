@@ -70,7 +70,7 @@ services:
      - /data/postgres/data:/var/lib/postgresql/data
     command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres
     environment: 
-     - POSTGRES_PASSWORD
+      - POSTGRES_PASSWORD
     networks:
      - yti-network
 
@@ -397,6 +397,32 @@ services:
      - yti-groupmanagement
     networks:
      - yti-network
+
+  yti-keycloak:
+    image: jboss/keycloak
+    container_name: yti-keycloak
+    restart: always
+    ports:
+     - "8080:8080"
+     - "8443:8443"
+    volumes:
+     - ./config:/config
+    environment:
+     - KEYCLOAK_USER=admin
+     - KEYCLOAK_PASSWORD=admin
+     - DB_VENDOR=postgres
+     - DB_ADDR=yti-postgres
+     - DB_PORT=5432
+     - DB_DATABASE=keycloak
+     - DB_USER=postgres
+     - DB_PASSWORD=
+     - KEYCLOAK_FRONTEND_URL=http://localhost:8080/auth
+    depends_on:
+     - yti-postgres
+    links:
+     - yti-postgres
+    networks:
+     - yti-network         
 
 networks:
   yti-network:

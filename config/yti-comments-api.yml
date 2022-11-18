@@ -78,8 +78,8 @@ session:
 
 hikari:
   jdbcUrl: jdbc:postgresql://${environment.postgres.host}:${environment.postgres.port}/${service.database-name}
-  username: postgres
-  password:
+  username: ${environment.postgres.username}
+  password: ${environment.postgres.password}
   minimumIdle: 10
   maximumPoolSize: 10
 
@@ -161,7 +161,7 @@ session:
 
 hikari:
   jdbcUrl: jdbc:postgresql://${environment.postgres.host}:${environment.postgres.port}/${service.database-name}
-  username: postgres
-  password:
+  username: ${environment.postgres.username}
+  password: ${environment.postgres.password}
   minimumIdle: 10
   maximumPoolSize: 10
