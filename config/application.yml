@@ -137,7 +137,8 @@ environment:
     public-host: localhost:9700 
     public-url: http://${environment.comments.public-host}
   messaging:
-    enabled: false
+    url: http://localhost:9801
+    enabled: true
  
 keycloak:
   configurationFile: file:///config/keycloak-docker.json
