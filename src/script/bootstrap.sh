@@ -37,7 +37,7 @@ clone_component_from_git () {
 
 clone_and_publish_components (){
     cd $1
-    tags=`git describe --tags $(git rev-list --tags --max-count=2)`
+    tags=`git describe --tags $(git rev-list --tags --max-count=1)`
     echo "tags=$tags"
     for tag in $tags
     do

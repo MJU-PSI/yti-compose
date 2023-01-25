@@ -137,7 +137,10 @@ services:
     image: yti-codelist-ui:latest
     container_name: yti-codelist-ui
     privileged: true
-    restart: always
+    environment:
+     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
+     - ANGULAR_CONFIG_REALM=iow
+     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
     ports:
       - "9600:80"
     depends_on:
@@ -258,7 +261,10 @@ services:
     image: "yti-terminology-ui:latest"
     container_name: "yti-terminology-ui"
     privileged: true
-    restart: always
+    environment:
+     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
+     - ANGULAR_CONFIG_REALM=iow
+     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
     ports:
      - "9100:80"
     depends_on:
@@ -273,7 +279,10 @@ services:
   yti-datamodel-ui:
     image: "yti-datamodel-ui:latest"
     container_name: "yti-datamodel-ui"
-    restart: always
+    environment:
+     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
+     - ANGULAR_CONFIG_REALM=iow
+     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
     ports:
      - "9000:80"
     networks:
@@ -365,7 +374,10 @@ services:
   yti-comments-ui:
     image: "yti-comments-ui:latest"
     container_name: "yti-comments-ui"
-    restart: always
+    environment:
+     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
+     - ANGULAR_CONFIG_REALM=iow
+     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
     ports:
      - "9700:80"
     volumes:
