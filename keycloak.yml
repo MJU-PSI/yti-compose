@@ -1,0 +1,35 @@
+version: '3'
+
+services:     
+  # KEYCLOAK
+  yti-keycloak:
+    image: jboss/keycloak
+    volumes:
+      - ./config:/config
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=postgres
+      - DB_ADDR=yti-postgres
+      - DB_PORT=5432
+      - DB_DATABASE=keycloak
+      - DB_USER=postgres
+      - "DB_PASSWORD=#{PASSWORD}"
+      - PROXY_ADDRESS_FORWARDING=true
+      - KEYCLOAK_FRONTEND_URL=http://psi.gora.si/keycloak/auth/
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-keycloak.rule=Host(`psi.gora.si`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
+        - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
+        - "traefik.http.routers.yti-keycloak.entrypoints=web"
+        #- "traefik.http.routers.yti-keycloak.tls=true"
+        #- "traefik.http.routers.yti-keycloak.tls.certresolver=leresolver"
+        - "traefik.http.routers.yti-keycloak.middlewares=strip-prefix-1,keycloak-strip-prefix"      
+        - traefik.http.middlewares.keycloak-strip-prefix.stripprefix.prefixes=/keycloak          
+    networks:
+      - traefik-public    
+
+networks:
+  traefik-public:
+    external: true

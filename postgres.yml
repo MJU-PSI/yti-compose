@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  yti-postgres:
+    image: yti-postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - /data/logs/yti-postgres:/data/logs/yti-postgres:Z
+      - /data/postgres/data:/var/lib/postgresql/data
+    command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres -c 'max_connections=250'
+    environment:
+      - POSTGRES_PASSWORD
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
