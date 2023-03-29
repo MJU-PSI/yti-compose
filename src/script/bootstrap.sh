@@ -1,10 +1,14 @@
 #!/bin/bash
 
-#common libraries
-commonLibs="yti-spring-security
-yti-spring-migration"
-#Component-list
-components="yti-codelist-common-model
+GIT_REPO="https://github.com/MJU-PSI/"
+
+#Component list
+#Define gradle task with suffix <:publishToMavenLocal>
+COMPONENTS="
+yti-spring-security:publishToMavenLocal
+yti-spring-migration:publishToMavenLocal
+yti-common-ui:publishTarball
+yti-codelist-common-model
 yti-docker-java-base
 yti-config-server
 yti-codelist-public-api-service
@@ -24,30 +28,16 @@ yti-activemq
 yti-postgres
 "
 
-#yti-fuseki = yti-datamodel-database
-termedComponents="termed-api"
-
-YTI_REPO="https://github.com/MJU-PSI/"
-TERMED_REPO="https://github.com/MJU-PSI/"
-
 #clone given repository from git with given branch or master
 clone_component_from_git () {
-        `git clone $1$2.git -b$3`
+    echo "Fetching $1$2"
+    `git clone $1$2.git -b$3`
 }
 
-clone_and_publish_components (){
+publish_component () {
     cd $1
-    tags=`git describe --tags $(git rev-list --tags --max-count=1)`
-    echo "tags=$tags"
-    for tag in $tags
-    do
-	echo "Get and compile tag $tag"
-	`git checkout $tag`
-         echo "publish component:$1"
-         echo "--------------------------"
-         ./gradlew publishToMavenLocal
-         echo "DONE $1"
-    done
+    echo "Publishing $1 with task $2"
+    ./gradlew $2
     cd ..
 }
 #Main
@@ -60,26 +50,21 @@ if [ $# -eq 1 ]
 fi
 BUILD_BASE=$PWD/build.$BRANCH
 
-echo Clone repositories
+echo "Clone repositories"
 mkdir -p $BUILD_BASE
 cd $BUILD_BASE
-echo "Fetching YTI into the $BUILD_BASE"
-echo "Get libraries"
-for lib in $commonLibs
-do
-    echo "Publishing $lib"
-    clone_component_from_git $YTI_REPO $lib $BRANCH
-    clone_and_publish_components $lib
-done
+echo "Fetching components into the $BUILD_BASE"
 echo "Get components"
-for currentComponent in $components
+for component in $COMPONENTS
 do
-    clone_component_from_git $YTI_REPO $currentComponent $BRANCH
-done
+    repo=$(echo $component | cut -f1 -d:)
+    task=$(echo $component | cut -f2 -s -d:)
+    clone_component_from_git $GIT_REPO $repo $BRANCH
 
-echo TERMED
-for currentComponent in $termedComponents
-do
-    clone_component_from_git $TERMED_REPO $currentComponent $BRANCH
+    if [ -n "$task" ]
+    then
+        echo "task=$task"
+        publish_component $repo $task
+    fi
 done
 cd ..
