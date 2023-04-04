@@ -1,5 +1,5 @@
 #!/bin/bash
-
+BRANCH=master
 GIT_REPO="https://github.com/MJU-PSI/"
 
 #Component list
@@ -7,7 +7,7 @@ GIT_REPO="https://github.com/MJU-PSI/"
 COMPONENTS="
 yti-spring-security:publishToMavenLocal
 yti-spring-migration:publishToMavenLocal
-yti-common-ui:publishTarball
+yti-common-ui:npmBuild
 yti-codelist-common-model
 yti-docker-java-base
 yti-config-server
@@ -42,13 +42,12 @@ publish_component () {
 }
 #Main
 #Where to fetch sources
-BRANCH=master
 if [ $# -eq 1 ]
   then
       echo "Active branch $1"
       BRANCH=$1
 fi
-BUILD_BASE=$PWD/build.$BRANCH
+BUILD_BASE=$PWD/test.$BRANCH
 
 echo "Clone repositories"
 mkdir -p $BUILD_BASE
@@ -57,14 +56,15 @@ echo "Fetching components into the $BUILD_BASE"
 echo "Get components"
 for component in $COMPONENTS
 do
-    repo=$(echo $component | cut -f1 -d:)
+    comp=$(echo $component | cut -f1 -d:)
     task=$(echo $component | cut -f2 -s -d:)
-    clone_component_from_git $GIT_REPO $repo $BRANCH
+    clone_component_from_git $GIT_REPO $comp $BRANCH
 
     if [ -n "$task" ]
     then
         echo "task=$task"
-        publish_component $repo $task
+        publish_component $comp $task
     fi
 done
 cd ..
+echo "YTI bootstrap done" 

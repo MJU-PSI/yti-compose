@@ -1,37 +1,43 @@
 #!/bin/bash
 BRANCH=master
 
-#YTI common libraries
-GENERIC_COMPONENTS="yti-spring-security
-		    yti-spring-migration"
-#YTI service components
-COMPONENT_LIST="yti-docker-java-base
-            yti-postgres
-            yti-groupmanagement
-            yti-codelist-common-model
-	        yti-codelist-public-api-service
-	        yti-codelist-content-intake-service
-            yti-codelist-ui
-            yti-activemq
-            yti-terminology-termed-docker
-            yti-terminology-api
-            yti-terminology-ui
-    	    yti-fuseki
-	        yti-datamodel-api
-            yti-datamodel-ui
-            yti-comments-api
-            yti-comments-ui
-            yti-messaging-api"
+#Components list for publish
+PUBLISH_COMPONENTS="
+yti-spring-security:publishToMavenLocal
+yti-spring-migration:publishToMavenLocal
+yti-common-ui:npmBuild
+"
+
+#Components list for building
+BUILD_COMPONENTS="
+yti-docker-java-base
+yti-postgres
+yti-groupmanagement
+yti-codelist-common-model
+yti-codelist-public-api-service
+yti-codelist-content-intake-service
+yti-codelist-ui
+yti-activemq
+yti-terminology-termed-docker
+yti-terminology-api
+yti-terminology-ui
+yti-fuseki
+yti-datamodel-api
+yti-datamodel-ui
+yti-comments-api
+yti-comments-ui
+yti-messaging-api
+"
 
 publish_component () {
-    pushd . >/dev/null
+    pushd . > /dev/null
     echo "publish component:$1"
     echo "--------------------------"
     cd $BUILD_BASE/$1/
     echo $PWD
-    ./gradlew publishToMavenLocal
+    ./gradlew $2
     echo "DONE $1"
-   popd
+    popd
 }
 
 build_component () {
@@ -53,17 +59,18 @@ if [ $# -eq 1 ]
     BRANCH=master
 fi
 BUILD_BASE=$PWD/build.$BRANCH
-#build generic artifacts
-for component in $GENERIC_COMPONENTS
+
+#Build generic artifacts
+for component in $PUBLISH_COMPONENTS
 do
-    echo "Handling $component"
-    publish_component  $component
+    comp=$(echo $component | cut -f1 -d:)
+    task=$(echo $component | cut -f2 -s -d:)
+    publish_component $comp $task
 done
-echo "Base libraries build"
+
 #Build release and YTI containers
-for component in $COMPONENT_LIST
+for component in $BUILD_COMPONENTS
 do
-    echo "Handling $component"
     build_component $component
 done
-echo "YTI build done" 
+echo "YTI setup done" 
