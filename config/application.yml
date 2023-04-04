@@ -68,7 +68,11 @@ environment:
     enabled: true
     
 keycloak:
-  configurationFile: file:///config/keycloak.json
+  auth-server-url: http://localhost:8080/auth
+  realm: psi
+  resource: psi-backend
+  bearer-only: true
+  ssl-required: external
 
 ---
 spring:
@@ -119,7 +123,7 @@ environment:
     host: yti-postgres
     port: 5432
     username: postgres
-    password: 
+    password: password
   codelist:
     public-host: localhost:9600
     public-url: http://${environment.codelist.public-host}
@@ -141,4 +145,10 @@ environment:
     enabled: true
  
 keycloak:
-  configurationFile: file:///config/keycloak-docker.json
+  auth-server-url: http://yti-keycloak:8080/auth
+  realm: psi
+  resource: psi-backend
+  public-client: true
+  bearer-only: true
+  ssl-required: external
+  confidential-port: 0
