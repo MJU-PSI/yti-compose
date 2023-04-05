@@ -111,8 +111,10 @@ services:
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
     depends_on:
       - yti-postgres
+      - yti-keycloak
     links:
       - yti-postgres
+      - yti-keycloak
     networks:
       - yti-network
 
@@ -172,10 +174,12 @@ services:
       - yti-groupmanagement
       - yti-codelist-elasticsearch
       - yti-postgres
+      - yti-keycloak
     links:
       - yti-groupmanagement
       - yti-codelist-elasticsearch
       - yti-postgres
+      - yti-keycloak
     networks:
       - yti-network
 
@@ -195,8 +199,10 @@ services:
     command: -j -Xmx512M
     depends_on:
       - yti-codelist-elasticsearch
+      - yti-keycloak
     links:
       - yti-codelist-elasticsearch
+      - yti-keycloak
     networks:
       - yti-network
 
@@ -253,12 +259,14 @@ services:
       - yti-terminology-termed-api
       - yti-postgres
       - yti-activemq
+      - yti-keycloak
     links:
       - yti-groupmanagement
       - yti-terminology-elasticsearch
       - yti-terminology-termed-api
       - yti-postgres
       - yti-activemq
+      - yti-keycloak
     networks:
       - yti-network
 
@@ -336,11 +344,13 @@ services:
       - yti-groupmanagement
       - yti-datamodel-elasticsearch
       - yti-terminology-termed-api
+      - yti-keycloak
     links:
       - yti-fuseki
       - yti-groupmanagement
       - yti-datamodel-elasticsearch
       - yti-terminology-termed-api
+      - yti-keycloak
     networks:
       - yti-network
 
@@ -373,9 +383,11 @@ services:
     depends_on:
       - yti-postgres
       - yti-groupmanagement
+      - yti-keycloak
     links:
       - yti-postgres
       - yti-groupmanagement
+      - yti-keycloak
     networks:
       - yti-network
 
@@ -415,9 +427,11 @@ services:
     depends_on:
       - yti-postgres
       - yti-groupmanagement
+      - yti-keycloak
     links:
       - yti-postgres
       - yti-groupmanagement
+      - yti-keycloak
     networks:
       - yti-network
 
