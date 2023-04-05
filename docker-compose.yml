@@ -134,7 +134,7 @@ services:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     volumes:
-      - /data/logs/yti-datamodel-elasticsearch:/usr/share/elasticsearch/logs:z
+      - /data/logs/yti-codelist-elasticsearch:/usr/share/elasticsearch/logs:z
     networks:
       - yti-network
 
