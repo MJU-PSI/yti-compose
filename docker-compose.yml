@@ -103,6 +103,10 @@ services:
     volumes:
       - ./config:/config
     environment:
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
       - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
     depends_on:

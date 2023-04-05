@@ -21,7 +21,7 @@ spring:
     table: schema_version
 
 service:
-  database-name: groupmanagement
+  database-name: yti_groupmanagement
 
 server:
   port: 9302
@@ -91,7 +91,7 @@ spring:
     table: schema_version
 
 service:
-  database-name: groupmanagement
+  database-name: yti_groupmanagement
 
 server:
   port: 9302
