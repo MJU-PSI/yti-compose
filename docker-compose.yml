@@ -58,383 +58,388 @@ services:
   #   - yti-network
 
   # POSTGRES
-
   yti-postgres:
     image: yti-postgres:latest
     container_name: yti-postgres
     restart: always
     ports:
-     - "5432:5432"
+      - "5432:5432"
     volumes:
-     - /data/logs/yti-postgres:/data/logs/yti-postgres:Z
-     - /data/postgres/data:/var/lib/postgresql/data
+      - /data/logs/yti-postgres:/data/logs/yti-postgres:Z
+      - /data/postgres/data:/var/lib/postgresql/data
     command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres
-    environment: 
+    environment:
+      - POSTGRES_USER
       - POSTGRES_PASSWORD
     networks:
-     - yti-network
+      - yti-network
 
   # ACTIVEMQ
-
   yti-activemq:
     image: yti-activemq:latest
     container_name: yti-activemq
     restart: always
     ports:
-     - "9900:8161"
-     - "9901:61616"
+      - "9900:8161"
+      - "9901:61616"
     environment:
-     - "ARTEMIS_USERNAME=yti"
-     - "ARTEMIS_PASSWORD=test"
-     - "ARTEMIS_MIN_MEMORY=512M"
-     - "ARTEMIS_MAX_MEMORY=512M"
+      - "ARTEMIS_USERNAME=yti"
+      - "ARTEMIS_PASSWORD=test"
+      - "ARTEMIS_MIN_MEMORY=512M"
+      - "ARTEMIS_MAX_MEMORY=512M"
     volumes:
-     - /data/logs/{{ projectname }}:/var/lib/artemis/log:z
+      - /data/logs/yti-activemq:/var/lib/artemis/log:z
     networks:
-     - yti-network
+      - yti-network
 
   # GROUPMANAGEMENT
-
   yti-groupmanagement:
     image: yti-groupmanagement:latest
     container_name: yti-groupmanagement
     restart: always
     ports:
-     - "9302:9302"
-     - "9300:9300"
+      - "9302:9302"
+      - "9300:9300"
     volumes:
-     - ./config:/config
+      - ./config:/config
     environment:
-     - "SPRING_PROFILES_ACTIVE=docker"
-     - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
     depends_on:
-     - yti-postgres
+      - yti-postgres
     links:
-     - yti-postgres
+      - yti-postgres
     networks:
-     - yti-network
+      - yti-network
 
   # CODELIST
-
   yti-codelist-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.8.22
     container_name: yti-codelist-elasticsearch
     restart: always
     ports:
-     - "9610:9200"
+      - "9610:9200"
     environment:
-     - xpack.security.enabled=false
-     - cluster.name=yti-codelist-elasticsearch
-     - http.host=0.0.0.0
-     - transport.host=0.0.0.0
-     - network.publish_host=127.0.0.1
-     - discovery.type=single-node
-     - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - xpack.security.enabled=false
+      - cluster.name=yti-codelist-elasticsearch
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - network.publish_host=127.0.0.1
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     networks:
-     - yti-network
+      - yti-network
 
   yti-codelist-ui:
     image: yti-codelist-ui:latest
     container_name: yti-codelist-ui
     privileged: true
     environment:
-     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
-     - ANGULAR_CONFIG_REALM=iow
-     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
     ports:
       - "9600:80"
     depends_on:
-     - yti-codelist-content-intake-service
-     - yti-codelist-public-api-service
+      - yti-codelist-content-intake-service
+      - yti-codelist-public-api-service
     links:
-     - yti-codelist-content-intake-service
-     - yti-codelist-public-api-service
+      - yti-codelist-content-intake-service
+      - yti-codelist-public-api-service
     networks:
-     - yti-network
+      - yti-network
 
   yti-codelist-content-intake-service:
     image: yti-codelist-content-intake-service:latest
     container_name: yti-codelist-content-intake-service
     restart: always
     ports:
-     - "9602:9602"
-     - "9603:9603"
-     - "19602:19602"
+      - "9602:9602"
+      - "9603:9603"
+      - "19602:19602"
     volumes:
-     - ./config:/config
-     - /tmp/data/yti/yti-codelist-intake:/data/yti/yti-codelist-intake
-    command: -j -Xmx2048M -a --spring.profiles.active=default,docker --spring.config.location=/config/application.yml,/config/yti-codelist-content-intake-service.yml
+      - ./config:/config
+    environment:
+      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-content-intake-service.yml"
+    command: -j -Xmx2048M
     depends_on:
-     - yti-groupmanagement
-     - yti-codelist-elasticsearch
-     - yti-postgres
+      - yti-groupmanagement
+      - yti-codelist-elasticsearch
+      - yti-postgres
     links:
-     - yti-groupmanagement
-     - yti-codelist-elasticsearch
-     - yti-postgres
+      - yti-groupmanagement
+      - yti-codelist-elasticsearch
+      - yti-postgres
     networks:
-     - yti-network
+      - yti-network
 
   yti-codelist-public-api-service:
     image: yti-codelist-public-api-service:latest
     container_name: yti-codelist-public-api-service
     restart: always
     ports:
-     - "9601:9601"
-     - "19601:19601"
+      - "9601:9601"
+      - "19601:19601"
     volumes:
-     - ./config:/config
-     - /tmp/data/yti/yti-codelist-api:/data/yti/yti-codelist-api
-     - /data/logs/yti-codelist-api:/data/logs/yti-codelist-api:Z
-    command: -j -Xmx512M -a --spring.profiles.active=default,docker --spring.config.location=/config/application.yml,/config/yti-codelist-public-api-service.yml
+      - ./config:/config
+      - /data/logs/yti-codelist-api:/data/logs/yti-codelist-api:Z
+    environment:
+      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-public-api-service.yml"
+    command: -j -Xmx512M
     depends_on:
-     - yti-codelist-elasticsearch
+      - yti-codelist-elasticsearch
     links:
-     - yti-codelist-elasticsearch
+      - yti-codelist-elasticsearch
     networks:
-     - yti-network
+      - yti-network
 
   # TERMINOLOGY
-
   yti-terminology-termed-api:
     image: "yti-terminology-termed-api:latest"
     container_name: "yti-terminology-termed-api"
     restart: always
     environment:
-     - SPRING_PROFILES_ACTIVE=default,docker
-     - SPRING_CONFIG_LOCATION=/config/yti-terminology-termed-api.properties
+      - SPRING_PROFILES_ACTIVE=default,docker
+      - SPRING_CONFIG_LOCATION=/config/yti-terminology-termed-api.properties
     ports:
-     - "9102:8080"
+      - "9102:8080"
     volumes:
-     - ./config:/config:Z
-     - /data/logs/yti-terminology-termed-api:/data/logs/yti-terminology-termed-api:Z
+      - ./config:/config:Z
+      - /data/logs/yti-terminology-termed-api:/data/logs/yti-terminology-termed-api:Z
     depends_on:
-     - yti-postgres
+      - yti-postgres
     links:
-     - yti-postgres
+      - yti-postgres
     networks:
-     - yti-network
+      - yti-network
 
   yti-terminology-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.8.22
     container_name: "yti-terminology-elasticsearch"
     restart: always
     ports:
-     - "9104:9200"
+      - "9104:9200"
     environment:
-     - xpack.security.enabled=false
-     - transport.host=127.0.0.1
-     - http.host=0.0.0.0
-     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - transport.host=127.0.0.1
+      - http.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     networks:
-     - yti-network
+      - yti-network
 
   yti-terminology-api:
     image: "yti-terminology-api:latest"
     container_name: "yti-terminology-api"
     restart: always
-    environment:
-     - SPRING_PROFILES_ACTIVE=default,docker
-     - SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml
     ports:
-     - "9101:9101"
-     - "9103:9103"
+      - "9101:9101"
+      - "9103:9103"
     volumes:
-     - ./config:/config:Z
-     - /data/logs/yti-terminology-api:/data/logs/yti-terminology-api:Z
+      - ./config:/config:Z
+      - /data/logs/yti-terminology-api:/data/logs/yti-terminology-api:Z
+    environment:
+      - SPRING_PROFILES_ACTIVE=default,docker
+      - SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml
     depends_on:
-     - yti-groupmanagement
-     - yti-terminology-elasticsearch
-     - yti-terminology-termed-api
-     - yti-postgres
-     - yti-activemq
+      - yti-groupmanagement
+      - yti-terminology-elasticsearch
+      - yti-terminology-termed-api
+      - yti-postgres
+      - yti-activemq
     links:
-     - yti-groupmanagement
-     - yti-terminology-elasticsearch
-     - yti-terminology-termed-api
-     - yti-postgres
-     - yti-activemq
+      - yti-groupmanagement
+      - yti-terminology-elasticsearch
+      - yti-terminology-termed-api
+      - yti-postgres
+      - yti-activemq
     networks:
-     - yti-network
+      - yti-network
 
   yti-terminology-ui:
     image: "yti-terminology-ui:latest"
     container_name: "yti-terminology-ui"
     privileged: true
     environment:
-     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
-     - ANGULAR_CONFIG_REALM=iow
-     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
     ports:
-     - "9100:80"
+      - "9100:80"
     depends_on:
-     - yti-terminology-api
+      - yti-terminology-api
     links:
-     - yti-terminology-api
+      - yti-terminology-api
     networks:
-     - yti-network
+      - yti-network
 
   # DATAMODEL
-
   yti-datamodel-ui:
     image: "yti-datamodel-ui:latest"
     container_name: "yti-datamodel-ui"
-    environment:
-     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
-     - ANGULAR_CONFIG_REALM=iow
-     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
     ports:
-     - "9000:80"
+      - "9000:80"
+    environment:
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
     networks:
-     - yti-network
+      - yti-network
     depends_on:
-     - yti-datamodel-api
+      - yti-datamodel-api
     links:
-     - yti-datamodel-api
-  
+      - yti-datamodel-api
+
   yti-datamodel-elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:6.8.22"
     container_name: "yti-datamodel-elasticsearch"
     restart: always
     ports:
-     - "9002:9200"
+      - "9002:9200"
     environment:
-     - xpack.security.enabled=false
-     - cluster.name=yti-datamodel-elasticsearch
-     - http.host=0.0.0.0
-     - network.publish_host=127.0.0.1
-     - discovery.type=single-node
-     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - cluster.name=yti-datamodel-elasticsearch
+      - http.host=0.0.0.0
+      - network.publish_host=127.0.0.1
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
-     - /data/logs/yti-datamodel-elasticsearch:/usr/share/elasticsearch/logs:z
+      - /data/logs/yti-datamodel-elasticsearch:/usr/share/elasticsearch/logs:z
     networks:
-     - yti-network
+      - yti-network
 
   yti-datamodel-api:
     image: "yti-datamodel-api:latest"
     container_name: "yti-datamodel-api"
     expose:
-     - "9001"
-     - "9004"
+      - "9001"
+      - "9004"
     ports:
-     - "9001:9001"
-     - "9004:9004"
+      - "9001:9001"
+      - "9004:9004"
     environment:
-     - SPRING_PROFILES_ACTIVE=docker
-     - SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml
     volumes:
-     - ./config:/config:Z
-     - /data/logs/yti-datamodel-api:/data/logs/yti-datamodel-api:Z
+      - ./config:/config:Z
+      - /data/logs/yti-datamodel-api:/data/logs/yti-datamodel-api:Z
     depends_on:
-     - yti-fuseki
-     - yti-groupmanagement
-     - yti-datamodel-elasticsearch
-     - yti-terminology-termed-api
+      - yti-fuseki
+      - yti-groupmanagement
+      - yti-datamodel-elasticsearch
+      - yti-terminology-termed-api
     links:
-     - yti-fuseki
-     - yti-groupmanagement
-     - yti-datamodel-elasticsearch
-     - yti-terminology-termed-api
+      - yti-fuseki
+      - yti-groupmanagement
+      - yti-datamodel-elasticsearch
+      - yti-terminology-termed-api
     networks:
-     - yti-network
+      - yti-network
 
   yti-fuseki:
     image: "yti-fuseki:latest"
     container_name: "yti-fuseki"
     restart: always
     ports:
-     - "3030:3030"
+      - "3030:3030"
     volumes:
-     - /data/logs/yti-fuseki:/fuseki/logs:Z
-     - /data/fuseki:/fuseki/databases
+      - /data/logs/yti-fuseki:/fuseki/logs:Z
+      - /data/fuseki:/fuseki/databases
     networks:
-     - yti-network
+      - yti-network
 
   # COMMENTS
-
   yti-comments-api:
     image: "yti-comments-api:latest"
     container_name: "yti-comments-api"
     restart: always
     ports:
-     - "9701:9701"
+      - "9701:9701"
+      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
     volumes:
-     - ./config:/config
-     - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
-    command: -j -Xmx2048M -a --spring.profiles.active=default,docker --spring.config.location=/config/application.yml,/config/yti-comments-api.yml
+      - ./config:/config
+      - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
+    command: -j -Xmx2048M
     depends_on:
-     - yti-postgres
-     - yti-groupmanagement
+      - yti-postgres
+      - yti-groupmanagement
     links:
-     - yti-postgres
-     - yti-groupmanagement
+      - yti-postgres
+      - yti-groupmanagement
     networks:
-     - yti-network
+      - yti-network
 
   yti-comments-ui:
     image: "yti-comments-ui:latest"
     container_name: "yti-comments-ui"
-    environment:
-     - ANGULAR_CONFIG_URL=http://localhost:8080/auth
-     - ANGULAR_CONFIG_REALM=iow
-     - ANGULAR_CONFIG_CLIENT_ID=iow-frontend
     ports:
-     - "9700:80"
+      - "9700:80"
+    environment:
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
     volumes:
-     - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
+      - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
     depends_on:
-     - yti-comments-api
+      - yti-comments-api
     links:
-     - yti-comments-api
+      - yti-comments-api
     networks:
-     - yti-network
+      - yti-network
 
   # MESSAGING
-
   yti-messaging-api:
     image: "yti-messaging-api:latest"
     container_name: "yti-messaging-api"
     restart: always
     ports:
-     - "9801:9801"
+      - "9801:9801"
+      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-messaging-api.yml"
     volumes:
-     - ./config:/config
-     - /data/logs/yti-messaging-api:/data/logs/yti-messaging-api:Z
-    command: -j -Xmx2048M -a --spring.profiles.active=default,docker --spring.config.location=/config/application.yml,/config/yti-messaging-api.yml
+      - ./config:/config
+      - /data/logs/yti-messaging-api:/data/logs/yti-messaging-api:Z
+    command: -j -Xmx2048M
     depends_on:
-     - yti-postgres
-     - yti-groupmanagement
+      - yti-postgres
+      - yti-groupmanagement
     links:
-     - yti-postgres
-     - yti-groupmanagement
+      - yti-postgres
+      - yti-groupmanagement
     networks:
-     - yti-network
+      - yti-network
 
   yti-keycloak:
     image: jboss/keycloak
     container_name: yti-keycloak
     restart: always
     ports:
-     - "8080:8080"
-     - "8443:8443"
+      - "8080:8080"
+      - "8443:8443"
     volumes:
-     - ./config:/config
+      - ./config:/config
     environment:
-     - KEYCLOAK_USER=admin
-     - KEYCLOAK_PASSWORD=admin
-     - DB_VENDOR=postgres
-     - DB_ADDR=yti-postgres
-     - DB_PORT=5432
-     - DB_DATABASE=keycloak
-     - DB_USER=postgres
-     - DB_PASSWORD=
-     - KEYCLOAK_FRONTEND_URL=http://localhost:8080/auth
+      - KEYCLOAK_USER
+      - KEYCLOAK_PASSWORD
+      - KEYCLOAK_FRONTEND_URL
+      - DB_VENDOR=${KEYCLOAK_DB_VENDOR}
+      - DB_ADDR=${KEYCLOAK_DB_ADDR}
+      - DB_PORT=${KEYCLOAK_DB_PORT}
+      - DB_DATABASE=${KEYCLOAK_DB_DATABASE}
+      - DB_USER=${KEYCLOAK_DB_USER}
+      - DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
     depends_on:
-     - yti-postgres
+      - yti-postgres
     links:
-     - yti-postgres
+      - yti-postgres
     networks:
-     - yti-network         
+      - yti-network
 
 networks:
   yti-network:
