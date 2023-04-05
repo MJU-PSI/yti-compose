@@ -202,8 +202,8 @@ services:
     container_name: "yti-terminology-termed-api"
     restart: always
     environment:
-      - SPRING_PROFILES_ACTIVE=default,docker
-      - SPRING_CONFIG_LOCATION=/config/yti-terminology-termed-api.properties
+      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_CONFIG_LOCATION=/config/yti-terminology-termed-api.properties"
     ports:
       - "9102:8080"
     volumes:
@@ -241,8 +241,8 @@ services:
       - ./config:/config:Z
       - /data/logs/yti-terminology-api:/data/logs/yti-terminology-api:Z
     environment:
-      - SPRING_PROFILES_ACTIVE=default,docker
-      - SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml
+      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml"
     depends_on:
       - yti-groupmanagement
       - yti-terminology-elasticsearch
@@ -322,8 +322,8 @@ services:
       - "9001:9001"
       - "9004:9004"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml"
     volumes:
       - ./config:/config:Z
       - /data/logs/yti-datamodel-api:/data/logs/yti-datamodel-api:Z
@@ -359,6 +359,7 @@ services:
     restart: always
     ports:
       - "9701:9701"
+    environment:
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
     volumes:
@@ -400,6 +401,7 @@ services:
     restart: always
     ports:
       - "9801:9801"
+    environment:
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-messaging-api.yml"
     volumes:
