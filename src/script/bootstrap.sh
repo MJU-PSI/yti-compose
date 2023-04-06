@@ -8,6 +8,7 @@ COMPONENTS="
 yti-spring-security:publishToMavenLocal
 yti-spring-migration:publishToMavenLocal
 yti-common-ui:npmBuild
+yti-termed-api
 yti-codelist-common-model
 yti-docker-java-base
 yti-config-server
