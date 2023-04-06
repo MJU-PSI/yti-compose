@@ -301,6 +301,7 @@ services:
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_DATAMODEL_DOMAIN
     networks:
       - yti-network
     depends_on:
