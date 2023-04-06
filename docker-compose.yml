@@ -143,6 +143,10 @@ services:
     container_name: yti-codelist-ui
     privileged: true
     environment:
+      - CODELIST_API_URL
+      - CODELIST_INTAKE_URL
+      - TERMINOLOGY_API_URL
+      - MESSAGING_API_URL
       - ANGULAR_PRODUCTION
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
@@ -152,9 +156,13 @@ services:
     depends_on:
       - yti-codelist-content-intake-service
       - yti-codelist-public-api-service
+      - yti-messaging-api
+      - yti-terminology-api
     links:
       - yti-codelist-content-intake-service
       - yti-codelist-public-api-service
+      - yti-messaging-api
+      - yti-terminology-api
     networks:
       - yti-network
 
@@ -277,6 +285,8 @@ services:
     container_name: "yti-terminology-ui"
     privileged: true
     environment:
+      - TERMINOLOGY_API_URL
+      - MESSAGING_API_URL
       - ANGULAR_PRODUCTION
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
@@ -285,8 +295,10 @@ services:
       - "9100:80"
     depends_on:
       - yti-terminology-api
+      - yti-messaging-api
     links:
       - yti-terminology-api
+      - yti-messaging-api
     networks:
       - yti-network
 
@@ -297,6 +309,8 @@ services:
     ports:
       - "9000:80"
     environment:
+      - DATAMODEL_API_URL
+      - MESSAGING_API_URL
       - ANGULAR_PRODUCTION
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
@@ -306,8 +320,10 @@ services:
       - yti-network
     depends_on:
       - yti-datamodel-api
+      - yti-messaging-api
     links:
       - yti-datamodel-api
+      - yti-messaging-api
 
   yti-datamodel-elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:6.8.22"
@@ -400,6 +416,8 @@ services:
     ports:
       - "9700:80"
     environment:
+      - COMMENTS_API_URL
+      - MESSAGING_API_URL
       - ANGULAR_PRODUCTION
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
@@ -408,8 +426,10 @@ services:
       - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
     depends_on:
       - yti-comments-api
+      - yti-messaging-api
     links:
       - yti-comments-api
+      - yti-messaging-api
     networks:
       - yti-network
 
