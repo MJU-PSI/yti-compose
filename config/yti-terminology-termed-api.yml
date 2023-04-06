@@ -1,0 +1,105 @@
+---
+spring:
+  profile: local
+  application:
+    name: yti-terminology-termed-api
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${environment.postgres.host}:${environment.postgres.port}/${service.database-name}
+    username: ${environment.postgres.username}
+    password: ${environment.postgres.password}
+  flyway:
+    locations: classpath:db/migration/common,classpath:db/migration/{vendor}
+  security:
+    user:
+      name: admin
+      password: admin
+  http:
+    converters:
+      preferred-json-mapper: gson
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+service:
+  database-name: yti_terminology
+
+server:
+  max-http-header-size: 10000000
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+
+fi:
+  thl:
+    termed:
+      nsprefixes:
+        rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+        rdfs: http://www.w3.org/2000/01/rdf-schema#
+        owl: http://www.w3.org/2002/07/owl#
+        skos: http://www.w3.org/2004/02/skos/core#
+        ts: http://uri.suomi.fi/datamodel/ns/st#
+        skosxl: http://www.w3.org/2008/05/skos-xl#
+        dcterms: http://purl.org/dc/terms/
+        dc: http://purl.org/dc/elements/1.1/
+        vs: http://www.w3.org/2003/06/sw-vocab-status/ns#
+        iow: http://uri.suomi.fi/datamodel/ns/iow#
+        ptvl: http://urn.fi/URN:NBN:fi:au:ptvl/
+
+---
+spring:
+  profile: docker
+  application:
+    name: yti-terminology-termed-api
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${environment.postgres.host}:${environment.postgres.port}/${service.database-name}
+    username: ${environment.postgres.username}
+    password: ${environment.postgres.password}
+  flyway:
+    locations: classpath:db/migration/common,classpath:db/migration/{vendor}
+  security:
+    user:
+      name: admin
+      password: admin
+  http:
+    converters:
+      preferred-json-mapper: gson
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+service:
+  database-name: yti_terminology
+
+server:
+  max-http-header-size: 10000000
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+
+fi:
+  thl:
+    termed:
+      nsprefixes:
+        rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+        rdfs: http://www.w3.org/2000/01/rdf-schema#
+        owl: http://www.w3.org/2002/07/owl#
+        skos: http://www.w3.org/2004/02/skos/core#
+        ts: http://uri.suomi.fi/datamodel/ns/st#
+        skosxl: http://www.w3.org/2008/05/skos-xl#
+        dcterms: http://purl.org/dc/terms/
+        dc: http://purl.org/dc/elements/1.1/
+        vs: http://www.w3.org/2003/06/sw-vocab-status/ns#
+        iow: http://uri.suomi.fi/datamodel/ns/iow#
+        ptvl: http://urn.fi/URN:NBN:fi:au:ptvl/

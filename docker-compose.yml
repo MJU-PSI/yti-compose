@@ -223,7 +223,7 @@ services:
     restart: always
     environment:
       - "SPRING_PROFILES_ACTIVE=default,docker"
-      - "SPRING_CONFIG_LOCATION=/config/yti-terminology-termed-api.properties"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-termed-api.yml"
     ports:
       - "9102:8080"
     volumes:
