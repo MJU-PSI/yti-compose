@@ -55,9 +55,6 @@ mq:
 front:
   restrictFilterOptions: true
 
-namespace:
-  root: http://uri.suomi.fi/terminology/
-
 organization:
   graph: 228cce1e-8360-4039-a3f7-725df5643354
 
@@ -87,6 +84,16 @@ application:
 fake:
   login:
     allowed: true
+    
+uri:
+  scheme: http
+  host: iow.gora.si
+  contextPath: /terminology
+  
+datamodel:
+  uri: 
+    scheme: http
+    host: iow.gora.si
 
 ---
 spring:
@@ -145,9 +152,6 @@ mq:
 front:
   restrictFilterOptions: true
 
-namespace:
-  root: http://uri.suomi.fi/terminology/
-
 organization:
   graph: 228cce1e-8360-4039-a3f7-725df5643354
 
@@ -178,3 +182,12 @@ fake:
   login:
     allowed: true
 
+uri:
+  scheme: http
+  host: iow.gora.si
+  contextPath: /terminology
+ 
+datamodel:
+  uri: 
+    scheme: http
+    host: iow.gora.si

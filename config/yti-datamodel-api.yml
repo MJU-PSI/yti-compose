@@ -34,7 +34,12 @@ publicTerminologyFrontend: ${environment.terminology.public-url}
 publicCommentsFrontend: ${environment.comments.public-url}
 publicTermedAPI: ${environment.terminology.public-url}/termed-api/
 messagingEnabled: ${environment.messaging.enabled}
-defaultNamespace: http://uri.suomi.fi/datamodel/ns/
+publicDatamodelFrontend: ${environment.datamodel.public-url}
+
+uri:
+  scheme: http
+  host: iow.gora.si
+  contextPath: /datamodel/ns/
 
 provenance: true
 
@@ -91,8 +96,13 @@ publicTerminologyFrontend: ${environment.terminology.public-url}
 publicCommentsFrontend: ${environment.comments.public-url}
 publicTermedAPI: ${environment.terminology.public-url}/termed-api/
 messagingEnabled: ${environment.messaging.enabled}
-defaultNamespace: http://uri.suomi.fi/datamodel/ns/
+publicDatamodelFrontend: ${environment.datamodel.public-url}
 
+uri:
+  scheme: http
+  host: iow.gora.si
+  contextPath: /datamodel/ns/
+  
 provenance: true
 
 migration:

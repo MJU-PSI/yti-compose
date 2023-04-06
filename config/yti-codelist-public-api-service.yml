@@ -43,6 +43,10 @@ yti_codelist_public_api_service_elastic_host: ${environment.codelist-elastic.hos
 yti_codelist_public_api_service_elastic_port: ${environment.codelist-elastic.port}
 yti_codelist_public_api_service_elastic_cluster: ${environment.codelist-elastic.cluster}
 
+uri:
+  scheme: http
+  host: iow.gora.si
+
 ---
 spring:
   config:
@@ -83,3 +87,7 @@ fake:
 yti_codelist_public_api_service_elastic_host: ${environment.codelist-elastic.host}
 yti_codelist_public_api_service_elastic_port: ${environment.codelist-elastic.port}
 yti_codelist_public_api_service_elastic_cluster: ${environment.codelist-elastic.cluster}
+
+uri:
+  scheme: http
+  host: iow.gora.si

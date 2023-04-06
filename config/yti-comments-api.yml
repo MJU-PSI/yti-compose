@@ -69,9 +69,9 @@ frontend:
   host: localhost
   port: 9700
 
-uri_suomi:
+uri:
   scheme: http
-  host: uri.suomi.fi
+  host: iow.gora.si
 
 session:
   timeout-mins: 10
@@ -152,9 +152,9 @@ frontend:
   host: localhost
   port: 9700
 
-uri_suomi:
+uri:
   scheme: http
-  host: uri.suomi.fi
+  host: iow.gora.si
 
 session:
   timeout-mins: 10
