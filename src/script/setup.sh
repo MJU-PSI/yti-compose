@@ -10,6 +10,7 @@ yti-common-ui:npmBuild
 
 #Components list for building
 BUILD_COMPONENTS="
+yti-termed-api
 yti-docker-java-base
 yti-postgres
 yti-groupmanagement
