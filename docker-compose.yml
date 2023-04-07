@@ -133,8 +133,6 @@ services:
       - network.publish_host=127.0.0.1
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
-    volumes:
-      - /data/logs/yti-codelist-elasticsearch:/usr/share/elasticsearch/logs:z
     networks:
       - yti-network
 
@@ -338,17 +336,12 @@ services:
       - network.publish_host=127.0.0.1
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    volumes:
-      - /data/logs/yti-datamodel-elasticsearch:/usr/share/elasticsearch/logs:z
     networks:
       - yti-network
 
   yti-datamodel-api:
     image: "yti-datamodel-api:latest"
     container_name: "yti-datamodel-api"
-    expose:
-      - "9001"
-      - "9004"
     ports:
       - "9001:9001"
       - "9004:9004"
@@ -486,4 +479,3 @@ services:
 
 networks:
   yti-network:
-    driver: bridge
