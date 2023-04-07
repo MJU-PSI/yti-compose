@@ -28,6 +28,7 @@ yti-datamodel-ui
 yti-comments-api
 yti-comments-ui
 yti-messaging-api
+yti-keycloak
 "
 
 publish_component () {

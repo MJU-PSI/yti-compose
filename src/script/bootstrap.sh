@@ -27,6 +27,7 @@ yti-comments-ui
 yti-messaging-api
 yti-activemq
 yti-postgres
+yti-keycloak
 "
 
 #clone given repository from git with given branch or master

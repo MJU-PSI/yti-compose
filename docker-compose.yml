@@ -459,7 +459,7 @@ services:
       - yti-network
 
   yti-keycloak:
-    image: jboss/keycloak
+    image: yti-keycloak:latest
     container_name: yti-keycloak
     restart: always
     ports:
@@ -471,6 +471,7 @@ services:
       - KEYCLOAK_USER
       - KEYCLOAK_PASSWORD
       - KEYCLOAK_FRONTEND_URL
+      - KEYCLOAK_HTTP_RELATIVE_PATH
       - DB_VENDOR=${KEYCLOAK_DB_VENDOR}
       - DB_ADDR=${KEYCLOAK_DB_ADDR}
       - DB_PORT=${KEYCLOAK_DB_PORT}
