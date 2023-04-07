@@ -40,7 +40,7 @@ environment:
     host: 127.0.0.1
     port: 5432
     username: postgres
-    password:
+    password: 
   codelist:
     public-host: localhost:9600
     #public-host: koodistot.dev.yti.cloud.vrk.fi
@@ -118,7 +118,7 @@ environment:
     port: 3030
   termed-api:
     host: yti-terminology-termed-api
-    port: 9102
+    port: 8080
   postgres:
     host: yti-postgres
     port: 5432
