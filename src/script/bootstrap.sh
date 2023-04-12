@@ -49,7 +49,7 @@ if [ $# -eq 1 ]
       echo "Active branch $1"
       BRANCH=$1
 fi
-BUILD_BASE=$PWD/test.$BRANCH
+BUILD_BASE=$PWD/build.$BRANCH
 
 echo "Clone repositories"
 mkdir -p $BUILD_BASE
