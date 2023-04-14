@@ -107,6 +107,7 @@ services:
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_GROUPMANAGEMENT_BASE_HREF
       - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
     depends_on:
@@ -149,6 +150,7 @@ services:
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_CODELIST_BASE_HREF
     ports:
       - "9600:80"
     depends_on:
@@ -289,6 +291,7 @@ services:
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_TERMINOLOGY_BASE_HREF
     ports:
       - "9100:80"
     depends_on:
@@ -314,6 +317,7 @@ services:
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
       - ANGULAR_DATAMODEL_DOMAIN
+      - ANGULAR_DATAMODEL_BASE_HREF
     networks:
       - yti-network
     depends_on:
@@ -415,6 +419,7 @@ services:
       - ANGULAR_KEYCLOAK_URL
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_COMMENTS_BASE_HREF
     volumes:
       - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
     depends_on:
