@@ -97,7 +97,7 @@ volumes:
    - /data/postgres:/var/lib/postgresql
 ```
 
-## Running services
+## Running services with docker
 
 ### Running individual services in backround
 
@@ -129,6 +129,28 @@ docker ps
 All processes
 ```
 docker ps -a
+```
+
+### Runing services in docker swarm
+```
+export $(cat .env) > /dev/null 2>&1;
+docker stack deploy -c docker-compose.yml "stack-name"
+```
+
+Override default settings
+```
+export $(cat .env.dev) > /dev/null 2>&1;
+docker stack deploy -c docker-compose.yml -c docker-compose.dev.yml "stack-name"
+```
+
+List services in the stack
+```
+docker stack services "stack-name"
+```
+
+Remove stack
+```
+docker stack rm "stack-name"
 ```
 
 ## Manual building

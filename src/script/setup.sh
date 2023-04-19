@@ -1,5 +1,6 @@
 #!/bin/bash
 BRANCH=master
+GIT_REPO="https://github.com/MJU-PSI/"
 
 #Components list for publish
 PUBLISH_COMPONENTS="
@@ -31,10 +32,19 @@ yti-messaging-api
 yti-keycloak
 "
 
+pull_component_from_git () {
+    pushd . > /dev/null
+    echo "Pulling $1"
+    cd $BUILD_BASE/$1/
+    echo $PWD
+    git pull
+    echo "DONE $1"
+    popd
+}
+
 publish_component () {
     pushd . > /dev/null
-    echo "publish component:$1"
-    echo "--------------------------"
+    echo "Publishing $1 with task $2"
     cd $BUILD_BASE/$1/
     echo $PWD
     ./gradlew $2
@@ -44,10 +54,9 @@ publish_component () {
 
 build_component () {
     pushd . >/dev/null
-    echo "--------------------------" 
-    echo "build component:$1 option:$2"
-    echo "--------------------------" 
+    echo "Building $1 with option $2"
     cd $BUILD_BASE/$1/
+    echo $PWD
     ./build.sh $2
     popd
 }
@@ -61,6 +70,15 @@ if [ $# -eq 1 ]
     BRANCH=master
 fi
 BUILD_BASE=$PWD/build.$BRANCH
+
+#Pull changes from GIT repository
+COMPONENTS="${PUBLISH_COMPONENTS}${BUILD_COMPONENTS}"
+#Build generic artifacts
+for component in $COMPONENTS
+do
+    comp=$(echo $component | cut -f1 -d:)
+    pull_component_from_git $comp
+done
 
 #Build generic artifacts
 for component in $PUBLISH_COMPONENTS

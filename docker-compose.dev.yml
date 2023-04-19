@@ -1,0 +1,165 @@
+# This file overrides docker-compose.yml with settings for DEV environment
+version: '3.9'
+
+services:
+  # TRAEFIK
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    command:
+      - --log.level=INFO
+      - --entrypoints.web.address=:80
+      # - --entrypoints.websecure.address=:443
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.swarmmode=true
+    ports:
+      - "80:80"
+    # - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    deploy:
+      labels:
+        # Dashboard
+        - "traefik.enable=true"
+        # Change the host url here
+        - "traefik.http.routers.traefik.rule=Host(`${DOMAIN}`) && PathPrefix(`/traefik`)"
+        - "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+        #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
+        - "traefik.http.routers.traefik.entrypoints=web"
+        - "traefik.http.routers.traefik.middlewares=authtraefik,traefik-strip-prefix"
+        - traefik.http.middlewares.traefik-strip-prefix.stripprefix.prefixes=/traefik
+        - "traefik.http.middlewares.strip-prefix-1.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.strip-prefix-1.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.strip-prefix-1.redirectregex.permanent=true"
+
+  # PORTAINER
+  agent:
+    image: portainer/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    deploy:
+      mode: global
+      placement:
+        constraints: [ node.platform.os == linux ]
+
+  portainer:
+    image: portainer/portainer
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.portainer.rule=Host(`${DOMAIN}`) && PathPrefix(`/portainer`)"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+        - "traefik.http.routers.portainer.entrypoints=web"
+        - "traefik.http.routers.portainer.middlewares=strip-prefix-1,portainer-strip"
+        - "traefik.http.middlewares.portainer-strip.stripprefix.prefixes=/portainer"
+      mode: replicated
+      placement:
+        constraints: [ node.role == manager ]
+
+  # POSTGRES
+  yti-postgres:
+    container_name: yti-postgres
+
+  # ACTIVEMQ
+  yti-activemq:
+    container_name: yti-activemq
+
+  # GROUPMANAGEMENT
+  yti-groupmanagement:
+    container_name: yti-groupmanagement
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`)"
+        - "traefik.http.services.yti-groupmanagement.loadbalancer.server.port=9302"
+        - "traefik.http.routers.yti-groupmanagement.entrypoints=web"
+        - "traefik.http.routers.yti-groupmanagement.middlewares=strip-prefix-1,groupmanagement-strip-prefix"
+        - "traefik.http.middlewares.groupmanagement-strip-prefix.stripprefix.prefixes=${GROUPMANAGEMENT_BASE_HREF}"
+
+  # CODELIST
+  yti-codelist-elasticsearch:
+    container_name: yti-codelist-elasticsearch
+
+  yti-codelist-ui:
+    container_name: yti-codelist-ui
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-codelist.rule=Host(`${DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`)"
+        - "traefik.http.services.yti-codelist.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-codelist.entrypoints=web"
+        - "traefik.http.routers.yti-codelist.middlewares=strip-prefix-1,codelist-strip-prefix"
+        - "traefik.http.middlewares.codelist-strip-prefix.stripprefix.prefixes=${CODELIST_BASE_HREF}"
+
+  yti-codelist-content-intake-service:
+    container_name: yti-codelist-content-intake-service
+
+  yti-codelist-public-api-service:
+    container_name: yti-codelist-public-api-service
+
+  # TERMINOLOGY
+  yti-terminology-termed-api:
+    container_name: "yti-terminology-termed-api"
+
+  yti-terminology-elasticsearch:
+    container_name: "yti-terminology-elasticsearch"
+
+  yti-terminology-api:
+    container_name: "yti-terminology-api"
+
+  yti-terminology-ui:
+    container_name: "yti-terminology-ui"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-terminology.rule=Host(`${DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`)"
+        - "traefik.http.services.yti-terminology.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-terminology.entrypoints=web"
+        - "traefik.http.routers.yti-terminology.middlewares=strip-prefix-1,terminology-strip-prefix"
+        - "traefik.http.middlewares.terminology-strip-prefix.stripprefix.prefixes=${TERMINOLOGY_BASE_HREF}"
+
+  # DATAMODEL
+  yti-datamodel-ui:
+    container_name: "yti-datamodel-ui"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-datamodel.rule=Host(`${DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`)"
+        - "traefik.http.services.yti-datamodel.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-datamodel.entrypoints=web"
+        - "traefik.http.routers.yti-datamodel.middlewares=strip-prefix-1,datamodel-stripprefix"
+        - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
+
+  yti-datamodel-elasticsearch:
+    container_name: "yti-datamodel-elasticsearch"
+
+  yti-datamodel-api:
+    container_name: "yti-datamodel-api"
+
+  yti-fuseki:
+    container_name: "yti-fuseki"
+
+  # COMMENTS
+  yti-comments-api:
+    container_name: "yti-comments-api"
+
+  yti-comments-ui:
+    container_name: "yti-comments-ui"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-comments-ui.rule=Host(`${DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
+        - "traefik.http.services.yti-comments-ui.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-comments-ui.entrypoints=web"
+        - "traefik.http.routers.yti-comments-ui.middlewares=strip-prefix-1,comments-strip-prefix"
+        - "traefik.http.middlewares.comments-strip-prefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
+
+  # MESSAGING
+  yti-messaging-api:
+    container_name: "yti-messaging-api"
