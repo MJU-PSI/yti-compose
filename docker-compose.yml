@@ -108,6 +108,8 @@ services:
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
       - ANGULAR_BASE_HREF=${GROUPMANAGEMENT_BASE_HREF}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
     depends_on:
@@ -177,6 +179,8 @@ services:
     volumes:
       - ./config:/config
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-content-intake-service.yml"
     command: -j -Xmx2048M
@@ -204,6 +208,8 @@ services:
       - ./config:/config
       - /data/logs/yti-codelist-api:/data/logs/yti-codelist-api:Z
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-public-api-service.yml"
     command: -j -Xmx512M
@@ -222,6 +228,8 @@ services:
     container_name: "yti-terminology-termed-api"
     restart: always
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-termed-api.yml"
     ports:
@@ -261,6 +269,8 @@ services:
       - ./config:/config:Z
       - /data/logs/yti-terminology-api:/data/logs/yti-terminology-api:Z
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml"
     depends_on:
@@ -350,6 +360,8 @@ services:
       - "9001:9001"
       - "9004:9004"
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml"
     volumes:
@@ -390,6 +402,8 @@ services:
     ports:
       - "9701:9701"
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
     volumes:
@@ -439,6 +453,8 @@ services:
     ports:
       - "9801:9801"
     environment:
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=default,docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-messaging-api.yml"
     volumes:
