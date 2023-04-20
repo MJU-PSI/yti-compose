@@ -67,7 +67,7 @@ services:
     volumes:
       - /data/logs/yti-postgres:/data/logs/yti-postgres:Z
       - /data/postgres/data:/var/lib/postgresql/data
-    command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres
+    command: postgres -c logging_collector=on -c log_directory=/data/logs/yti-postgres -c max_connections=250
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
