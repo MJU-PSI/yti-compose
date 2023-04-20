@@ -8,11 +8,13 @@ services:
     container_name: traefik
     command:
       - --log.level=INFO
+      - --api.dashboard=true
       - --entrypoints.web.address=:80
       # - --entrypoints.websecure.address=:443
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.swarmmode=true
+      - --providers.docker.network=yti-network
     ports:
       - "80:80"
     # - "443:443"
@@ -33,6 +35,8 @@ services:
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.permanent=true"
+    networks:
+      - yti-network
 
   # PORTAINER
   agent:
@@ -44,6 +48,8 @@ services:
       mode: global
       placement:
         constraints: [ node.platform.os == linux ]
+    networks:
+      - yti-network
 
   portainer:
     image: portainer/portainer
@@ -61,6 +67,8 @@ services:
       mode: replicated
       placement:
         constraints: [ node.role == manager ]
+    networks:
+      - yti-network
 
   # POSTGRES
   yti-postgres:
