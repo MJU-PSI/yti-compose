@@ -77,7 +77,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
+        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
         - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.yti-keycloak.entrypoints=web"
         - "traefik.http.routers.yti-keycloak.middlewares=strip-prefix-1,keycloak-strip-prefix"
