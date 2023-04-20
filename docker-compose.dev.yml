@@ -85,7 +85,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`) || HeadersRegexp(`Referer`, `${GROUPMANAGEMENT_BASE_HREF}`)"
+        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`) || HeadersRegexp(`Referer`, `${GROUPMANAGEMENT_BASE_HREF}/`)"
         - "traefik.http.services.yti-groupmanagement.loadbalancer.server.port=9302"
         - "traefik.http.routers.yti-groupmanagement.entrypoints=web"
         - "traefik.http.routers.yti-groupmanagement.middlewares=strip-prefix-1,groupmanagement-strip-prefix"
@@ -100,7 +100,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-codelist.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`) || HeadersRegexp(`Referer`, `${CODELIST_BASE_HREF}`)"
+        - "traefik.http.routers.yti-codelist.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`) || HeadersRegexp(`Referer`, `${CODELIST_BASE_HREF}/`)"
         - "traefik.http.services.yti-codelist.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-codelist.entrypoints=web"
         - "traefik.http.routers.yti-codelist.middlewares=strip-prefix-1,codelist-strip-prefix"
@@ -127,7 +127,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-terminology.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`) || HeadersRegexp(`Referer`, `${TERMINOLOGY_BASE_HREF}`)"
+        - "traefik.http.routers.yti-terminology.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`) || HeadersRegexp(`Referer`, `${TERMINOLOGY_BASE_HREF}/`)"
         - "traefik.http.services.yti-terminology.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-terminology.entrypoints=web"
         - "traefik.http.routers.yti-terminology.middlewares=strip-prefix-1,terminology-strip-prefix"
@@ -139,7 +139,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-datamodel.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`) || HeadersRegexp(`Referer`, `${DATAMODEL_BASE_HREF}`)"
+        - "traefik.http.routers.yti-datamodel.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`) || HeadersRegexp(`Referer`, `${DATAMODEL_BASE_HREF}/`)"
         - "traefik.http.services.yti-datamodel.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-datamodel.entrypoints=web"
         - "traefik.http.routers.yti-datamodel.middlewares=strip-prefix-1,datamodel-stripprefix"
@@ -163,7 +163,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-comments-ui.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`) || HeadersRegexp(`Referer`, `${COMMENTS_BASE_HREF}`)"
+        - "traefik.http.routers.yti-comments-ui.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`) || HeadersRegexp(`Referer`, `${COMMENTS_BASE_HREF}/`)"
         - "traefik.http.services.yti-comments-ui.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-comments-ui.entrypoints=web"
         - "traefik.http.routers.yti-comments-ui.middlewares=strip-prefix-1,comments-strip-prefix"
