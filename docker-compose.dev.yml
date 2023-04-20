@@ -54,7 +54,7 @@ services:
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --admin-password '${PORTAINER_PASSWORD}'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
@@ -70,6 +70,17 @@ services:
         constraints: [ node.role == manager ]
     networks:
       - yti-network
+
+  # KEYCLOAK
+  yti-keycloak:
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
+        - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
+        - "traefik.http.routers.yti-keycloak.entrypoints=web"
+        - "traefik.http.routers.yti-keycloak.middlewares=strip-prefix-1,keycloak-strip-prefix"
+        - "traefik.http.middlewares.keycloak-strip-prefix.stripprefix.prefixes=/keycloak"
 
   # POSTGRES
   yti-postgres:
