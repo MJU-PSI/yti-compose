@@ -14,7 +14,7 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.swarmmode=true
-      - --providers.docker.network=psi-network
+      - --providers.docker.network=${PROJECT_NAME}_yti-network
     ports:
       - "80:80"
     # - "443:443"
@@ -25,7 +25,7 @@ services:
         # Dashboard
         - "traefik.enable=true"
         # Change the host url here
-        - "traefik.http.routers.traefik.rule=Host(`${DOMAIN}`) && PathPrefix(`/traefik`)"
+        - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `/traefik/`)"
         - "traefik.http.routers.traefik.service=api@internal"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
         #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
@@ -37,7 +37,7 @@ services:
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.permanent=true"
     networks:
-      - psi-network
+      - yti-network
 
   # PORTAINER
   agent:
@@ -50,7 +50,7 @@ services:
       placement:
         constraints: [ node.platform.os == linux ]
     networks:
-      - psi-network
+      - yti-network
 
   portainer:
     image: portainer/portainer
@@ -60,7 +60,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.portainer.rule=Host(`${DOMAIN}`) && PathPrefix(`/portainer`)"
+        - "traefik.http.routers.portainer.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/portainer`)"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
         - "traefik.http.routers.portainer.entrypoints=web"
         - "traefik.http.routers.portainer.middlewares=strip-prefix-1,portainer-strip"
@@ -69,19 +69,15 @@ services:
       placement:
         constraints: [ node.role == manager ]
     networks:
-      - psi-network
+      - yti-network
 
   # POSTGRES
   yti-postgres:
     container_name: yti-postgres
-    networks:
-      - psi-network
 
   # ACTIVEMQ
   yti-activemq:
     container_name: yti-activemq
-    networks:
-      - psi-network
 
   # GROUPMANAGEMENT
   yti-groupmanagement:
@@ -89,13 +85,11 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`)"
+        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`) || HeadersRegexp(`Referer`, `${GROUPMANAGEMENT_BASE_HREF}`)"
         - "traefik.http.services.yti-groupmanagement.loadbalancer.server.port=9302"
         - "traefik.http.routers.yti-groupmanagement.entrypoints=web"
         - "traefik.http.routers.yti-groupmanagement.middlewares=strip-prefix-1,groupmanagement-strip-prefix"
         - "traefik.http.middlewares.groupmanagement-strip-prefix.stripprefix.prefixes=${GROUPMANAGEMENT_BASE_HREF}"
-    networks:
-      - psi-network
 
   # CODELIST
   yti-codelist-elasticsearch:
@@ -108,52 +102,38 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-codelist.rule=Host(`${DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`)"
+        - "traefik.http.routers.yti-codelist.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`) || HeadersRegexp(`Referer`, `${CODELIST_BASE_HREF}`)"
         - "traefik.http.services.yti-codelist.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-codelist.entrypoints=web"
         - "traefik.http.routers.yti-codelist.middlewares=strip-prefix-1,codelist-strip-prefix"
         - "traefik.http.middlewares.codelist-strip-prefix.stripprefix.prefixes=${CODELIST_BASE_HREF}"
-    networks:
-      - psi-network
 
   yti-codelist-content-intake-service:
     container_name: yti-codelist-content-intake-service
-    networks:
-      - psi-network
 
   yti-codelist-public-api-service:
     container_name: yti-codelist-public-api-service
-    networks:
-      - psi-network
 
   # TERMINOLOGY
   yti-terminology-termed-api:
     container_name: "yti-terminology-termed-api"
-    networks:
-      - psi-network
 
   yti-terminology-elasticsearch:
     container_name: "yti-terminology-elasticsearch"
-    networks:
-      - psi-network
 
   yti-terminology-api:
     container_name: "yti-terminology-api"
-    networks:
-      - psi-network
 
   yti-terminology-ui:
     container_name: "yti-terminology-ui"
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-terminology.rule=Host(`${DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`)"
+        - "traefik.http.routers.yti-terminology.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`) || HeadersRegexp(`Referer`, `${TERMINOLOGY_BASE_HREF}`)"
         - "traefik.http.services.yti-terminology.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-terminology.entrypoints=web"
         - "traefik.http.routers.yti-terminology.middlewares=strip-prefix-1,terminology-strip-prefix"
         - "traefik.http.middlewares.terminology-strip-prefix.stripprefix.prefixes=${TERMINOLOGY_BASE_HREF}"
-    networks:
-      - psi-network
 
   # DATAMODEL
   yti-datamodel-ui:
@@ -161,54 +141,36 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-datamodel.rule=Host(`${DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`)"
+        - "traefik.http.routers.yti-datamodel.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`) || HeadersRegexp(`Referer`, `${DATAMODEL_BASE_HREF}`)"
         - "traefik.http.services.yti-datamodel.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-datamodel.entrypoints=web"
         - "traefik.http.routers.yti-datamodel.middlewares=strip-prefix-1,datamodel-stripprefix"
         - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
-    networks:
-      - psi-network
 
   yti-datamodel-elasticsearch:
     container_name: "yti-datamodel-elasticsearch"
-    networks:
-      - psi-network
 
   yti-datamodel-api:
     container_name: "yti-datamodel-api"
-    networks:
-      - psi-network
 
   yti-fuseki:
     container_name: "yti-fuseki"
-    networks:
-      - psi-network
 
   # COMMENTS
   yti-comments-api:
     container_name: "yti-comments-api"
-    networks:
-      - psi-network
 
   yti-comments-ui:
     container_name: "yti-comments-ui"
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-comments-ui.rule=Host(`${DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
+        - "traefik.http.routers.yti-comments-ui.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`) || HeadersRegexp(`Referer`, `${COMMENTS_BASE_HREF}`)"
         - "traefik.http.services.yti-comments-ui.loadbalancer.server.port=80"
         - "traefik.http.routers.yti-comments-ui.entrypoints=web"
         - "traefik.http.routers.yti-comments-ui.middlewares=strip-prefix-1,comments-strip-prefix"
         - "traefik.http.middlewares.comments-strip-prefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
-    networks:
-      - psi-network
 
   # MESSAGING
   yti-messaging-api:
     container_name: "yti-messaging-api"
-    networks:
-      - psi-network
-
-networks:
-  psi-network:
-    name: psi-network
