@@ -94,8 +94,6 @@ services:
   # CODELIST
   yti-codelist-elasticsearch:
     container_name: yti-codelist-elasticsearch
-    networks:
-      - psi-network
 
   yti-codelist-ui:
     container_name: yti-codelist-ui
