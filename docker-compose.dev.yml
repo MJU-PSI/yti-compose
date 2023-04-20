@@ -31,7 +31,8 @@ services:
         #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
         - "traefik.http.routers.traefik.entrypoints=web"
         - "traefik.http.routers.traefik.middlewares=authtraefik,traefik-strip-prefix"
-        - traefik.http.middlewares.traefik-strip-prefix.stripprefix.prefixes=/traefik
+        - "traefik.http.middlewares.authtraefik.basicauth.users=${TRAEFIK_AUTH}"
+        - "traefik.http.middlewares.traefik-strip-prefix.stripprefix.prefixes=/traefik"
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.strip-prefix-1.redirectregex.permanent=true"
