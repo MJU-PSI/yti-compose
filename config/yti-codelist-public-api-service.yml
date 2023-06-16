@@ -33,11 +33,11 @@ session:
   timeout-mins: 10
 
 impersonate:
-  allowed: true
+  allowed: false
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 yti_codelist_public_api_service_elastic_host: ${environment.codelist-elastic.host}
 yti_codelist_public_api_service_elastic_port: ${environment.codelist-elastic.port}
@@ -78,11 +78,11 @@ session:
   timeout-mins: 10
 
 impersonate:
-  allowed: true
+  allowed: false
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 yti_codelist_public_api_service_elastic_host: ${environment.codelist-elastic.host}
 yti_codelist_public_api_service_elastic_port: ${environment.codelist-elastic.port}

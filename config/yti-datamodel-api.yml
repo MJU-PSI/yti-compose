@@ -51,14 +51,14 @@ groupmanagement:
   url: ${environment.groupmanagement.url}
   public.url: ${environment.groupmanagement.public-url}
 
-env: local
+env: prod
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 impersonate:
-  allowed: true
+  allowed: false
 
 ---
 spring:
@@ -113,12 +113,12 @@ groupmanagement:
   url: ${environment.groupmanagement.url}
   public.url: ${environment.groupmanagement.public-url}
 
-env: local
+env: prod
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 impersonate:
-  allowed: true
+  allowed: false
 

@@ -131,16 +131,16 @@ application:
   contextPath: "/codelist-intake"
   access-log: true
   initializeContent: true
-  env: local
+  env: prod
 
 frontend:
   defaultStatus: null
   codeSchemeSortMode: "boostStatus"
 
 publicapi:
-  scheme: http
-  host: localhost
-  port: 9601
+  scheme: https
+  host: psi.gora.si/sifranti
+  port: 
   contextPath: "/codelist-api"
 
 uri:
@@ -163,9 +163,9 @@ yti_codelist_content_intake_service_elastic_port: ${environment.codelist-elastic
 yti_codelist_content_intake_service_elastic_cluster: ${environment.codelist-elastic.cluster}
 
 impersonate:
-  allowed: true
+  allowed: false
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
