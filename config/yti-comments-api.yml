@@ -115,10 +115,10 @@ tomcat:
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 impersonate:
-  allowed: true
+  allowed: false
 
 groupmanagement:
   url: ${environment.groupmanagement.url}
