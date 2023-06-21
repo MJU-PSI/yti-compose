@@ -57,6 +57,7 @@ application:
   commentsUrl: ${environment.comments.public-url}
   env: local
   messagingEnabled: ${environment.messaging.enabled}
+  defaultLanguage: sl
 
 jwt:
   secret: TESTSECRET
@@ -127,6 +128,7 @@ application:
   commentsUrl: ${environment.comments.public-url}
   env: prod
   messagingEnabled: ${environment.messaging.enabled}
+  defaultLanguage: sl
 
 jwt:
   secret: TESTSECRET

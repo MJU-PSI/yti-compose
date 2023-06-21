@@ -63,6 +63,7 @@ application:
   contextPath: /comments-api
   access-log: true
   env: prod
+  defaultLanguage: sl
 
 frontend:
   scheme: https
@@ -146,6 +147,7 @@ application:
   contextPath: "/comments-api"
   access-log: true
   env: prod
+  defaultLanguage: sl
 
 frontend:
   scheme: http
