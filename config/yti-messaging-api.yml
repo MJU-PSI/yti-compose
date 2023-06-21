@@ -61,6 +61,7 @@ application:
   contextPath: "/messaging-api"
   access-log: true
   env: local
+  defaultLanguage: sl
 
 session:
   timeout-mins: 10
@@ -145,6 +146,7 @@ application:
   contextPath: "/messaging-api"
   access-log: true
   env: local
+  defaultLanguage: sl
 
 session:
   timeout-mins: 10
