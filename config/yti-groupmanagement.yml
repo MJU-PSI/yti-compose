@@ -23,6 +23,8 @@ spring:
 service:
   database-name: yti_groupmanagement
 
+defaultLanguage: ${environment.defaultLanguage}
+
 server:
   port: 9302
 
@@ -57,7 +59,6 @@ application:
   commentsUrl: ${environment.comments.public-url}
   env: local
   messagingEnabled: ${environment.messaging.enabled}
-  defaultLanguage: sl
 
 jwt:
   secret: TESTSECRET
@@ -94,6 +95,8 @@ spring:
 service:
   database-name: yti_groupmanagement
 
+defaultLanguage: ${environment.defaultLanguage}
+
 server:
   port: 9302
 
@@ -128,7 +131,6 @@ application:
   commentsUrl: ${environment.comments.public-url}
   env: prod
   messagingEnabled: ${environment.messaging.enabled}
-  defaultLanguage: sl
 
 jwt:
   secret: TESTSECRET

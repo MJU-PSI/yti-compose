@@ -35,7 +35,7 @@ publicCommentsFrontend: ${environment.comments.public-url}
 publicTermedAPI: ${environment.terminology.public-url}/termed-api/
 messagingEnabled: ${environment.messaging.enabled}
 publicDatamodelFrontend: ${environment.datamodel.public-url}
-defaultLanguage: sl
+defaultLanguage: ${environment.defaultLanguage}
 
 uri:
   scheme: http

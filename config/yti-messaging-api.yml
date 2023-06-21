@@ -36,6 +36,8 @@ tomcat:
   ajp:
     port: 9802
 
+defaultLanguage: sl
+
 groupmanagement:
   url: ${environment.groupmanagement.url}
   publicUrl: ${environment.groupmanagement.public-url}
@@ -61,7 +63,6 @@ application:
   contextPath: "/messaging-api"
   access-log: true
   env: local
-  defaultLanguage: sl
 
 session:
   timeout-mins: 10
@@ -121,6 +122,8 @@ tomcat:
   ajp:
     port: 9802
 
+defaultLanguage: sl
+
 groupmanagement:
   url: ${environment.groupmanagement.url}
   publicUrl: ${environment.groupmanagement.public-url}
@@ -146,7 +149,6 @@ application:
   contextPath: "/messaging-api"
   access-log: true
   env: local
-  defaultLanguage: sl
 
 session:
   timeout-mins: 10

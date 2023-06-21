@@ -34,6 +34,8 @@ fake:
   login:
     allowed: false
 
+defaultLanguage: sl
+
 impersonate:
   allowed: false
 
@@ -117,6 +119,8 @@ tomcat:
 fake:
   login:
     allowed: false
+
+defaultLanguage: sl
 
 impersonate:
   allowed: false

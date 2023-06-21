@@ -18,6 +18,7 @@ thread:
     min: 10
 
 environment:
+  defaultLanguage: sl
   codelist-elastic:
     host: 127.0.0.1
     port: 9610
@@ -40,7 +41,7 @@ environment:
     host: 127.0.0.1
     port: 5432
     username: postgres
-    password: 
+    password: Jaz!Ti!On
   codelist:
     public-host: localhost:9600
     #public-host: koodistot.dev.yti.cloud.vrk.fi
@@ -73,7 +74,6 @@ keycloak:
   resource: psi-backend
   bearer-only: true
   ssl-required: external
-
 ---
 spring:
   config:
@@ -100,6 +100,7 @@ thread:
     min: 10
 
 environment:
+  defaultLanguage: sl
   codelist-elastic:
     host: yti-codelist-elasticsearch
     port: 9200
