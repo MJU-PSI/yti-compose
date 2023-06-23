@@ -52,6 +52,7 @@ application:
   access-log: true
   initializeContent: true
   env: local
+  languages: ${environment.languages}
 
 frontend:
   defaultStatus: null
