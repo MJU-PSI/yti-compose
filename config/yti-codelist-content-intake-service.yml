@@ -133,6 +133,7 @@ application:
   access-log: true
   initializeContent: true
   env: prod
+  languages: ${environment.languages}
 
 frontend:
   defaultStatus: null
