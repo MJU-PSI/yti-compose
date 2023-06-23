@@ -101,6 +101,7 @@ thread:
     min: 10
 
 environment:
+  languages: sl,en
   defaultLanguage: sl
   codelist-elastic:
     host: yti-codelist-elasticsearch
