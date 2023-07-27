@@ -127,6 +127,16 @@ environment:
     port: 5432
     username: postgres
     password: password
+  mail:
+    host: host
+    port: 25
+    username: username
+    password: password
+    smtp:
+      auth: false
+      starttls:
+        enable: false
+        required: false
   codelist:
     public-host: localhost:9600
     public-url: http://${environment.codelist.public-host}
