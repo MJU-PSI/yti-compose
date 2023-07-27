@@ -76,14 +76,17 @@ spring:
   application:
     name: yti-groupmanagement
   mail:
-    host: mail.gora.lan
-    port: 25
+    host: ${environment.mail.host}
+    port: ${environment.mail.port}
+    username: ${environment.mail.username}
+    password: ${environment.mail.password}
     properties:
       mail:
         smtp:
-          auth: false
+          auth: ${environment.mail.smtp.auth}
           starttls:
-            enable: false
+            enable: ${environment.mail.smtp.starttls.enable}
+            required: ${environment.mail.smtp.starttls.required}
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${environment.postgres.host}:${environment.postgres.port}/${service.database-name}

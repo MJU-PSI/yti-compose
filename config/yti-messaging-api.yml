@@ -92,14 +92,17 @@ spring:
   application:
     name: yti-messaging-api
   mail:
-    host: smtp.gmail.com
-    port: 587
+    host: ${environment.mail.host}
+    port: ${environment.mail.port}
+    username: ${environment.mail.username}
+    password: ${environment.mail.password}
     properties:
       mail:
         smtp:
-          auth: true
+          auth: ${environment.mail.smtp.auth}
           starttls:
-            enable: true
+            enable: ${environment.mail.smtp.starttls.enable}
+            required: ${environment.mail.smtp.starttls.required}
   jpa:
     show-sql: false
     generate-ddl: false
