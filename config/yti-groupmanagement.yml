@@ -50,7 +50,7 @@ send:
     emails: false
     
 admin:
-  email: "y-alusta.tuotetiimi@dvv.fi"
+  email: "admin@localhost"
 
 application:
   codeListUrl: ${environment.codelist.public-url}
@@ -125,7 +125,7 @@ send:
     emails: false
 
 admin:
-  email: "admin@gora.si"
+  email: ${environment.admin.email}
 
 application:
   codeListUrl: ${environment.codelist.public-url}

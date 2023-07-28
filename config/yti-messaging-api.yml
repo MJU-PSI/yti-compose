@@ -82,7 +82,7 @@ fake:
     allowed: true
 
 admin:
-  email: "y-alusta.tuotetiimi@dvv.fi"
+  email: "admin@localhost"
 
 ---
 spring:
@@ -171,5 +171,5 @@ fake:
     allowed: true
 
 admin:
-  email: "y-alusta.tuotetiimi@dvv.fi"
+  email: ${environment.admin.email}
 
