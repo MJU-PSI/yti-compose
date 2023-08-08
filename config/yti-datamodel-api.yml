@@ -11,9 +11,9 @@ tomcat:
   ajp:
     port: 9001
 
-elasticHost: ${environment.datamodel-elastic.host}
-elasticHttpPort: ${environment.datamodel-elastic.port}
-elasticHttpScheme: http
+elasticHost: ${environment.elasticsearch.host}
+elasticHttpPort: ${environment.elasticsearch.port}
+elasticHttpScheme: ${environment.elasticsearch.scheme}
 
 endpoint: http://${environment.fuseki.host}:${environment.fuseki.port}
 
@@ -74,9 +74,9 @@ tomcat:
   ajp:
     port: 9001
 
-elasticHost: ${environment.datamodel-elastic.host}
-elasticHttpPort: ${environment.datamodel-elastic.port}
-elasticHttpScheme: http
+elasticHost: ${environment.elasticsearch.host}
+elasticHttpPort: ${environment.elasticsearch.port}
+elasticHttpScheme: ${environment.elasticsearch.scheme}
 
 endpoint: http://${environment.fuseki.host}:${environment.fuseki.port}
 
@@ -115,12 +115,12 @@ groupmanagement:
   url: ${environment.groupmanagement.url}
   public.url: ${environment.groupmanagement.public-url}
 
-env: local
+env: prod
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 impersonate:
-  allowed: true
+  allowed: false
 

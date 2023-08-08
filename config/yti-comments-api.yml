@@ -117,12 +117,12 @@ tomcat:
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 defaultLanguage: sl
 
 impersonate:
-  allowed: true
+  allowed: false
 
 groupmanagement:
   url: ${environment.groupmanagement.url}
@@ -144,17 +144,17 @@ messaging:
   enabled: ${environment.messaging.enabled}
 
 application:
-  scheme: http
-  host: localhost
-  port: ${server.port}
+  scheme: https
+  host: psi.gora.si/komentarji
+  port: 
   contextPath: "/comments-api"
   access-log: true
-  env: local
+  env: prod
 
 frontend:
-  scheme: http
-  host: localhost
-  port: 9700
+  scheme: https
+  host: psi.gora.si/komentarji
+  port: 
 
 uri:
   scheme: http

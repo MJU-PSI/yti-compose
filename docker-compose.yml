@@ -3,17 +3,15 @@
 # YTI Fuseki
 # YTI Groupmanagement - Groupmanagement API + UI bundle
 # YTI ActiveMQ - Active MQ
+# YTI ElasticSearch - Elastic Search
 # YTI Codelist - Intake Service
 # YTI Codelist - Public API Service
 # YTI Codelist - UI
-# YTI Codelist - ElasticSearch
 # YTI Terminology - Termed API
-# YTI Terminology - ElasticSearch
 # YTI Terminology - API
 # YTI Terminology - UI
 # YTI Datamodel - API
 # YTI Datamodel - UI
-# YTI Datamodel - ElasticSEarch
 # YTI Comments - API
 # YTI Comments - UI
 # ---------------------------------------------------------------------------------------
@@ -24,38 +22,33 @@ services:
 
   # KIBANA
   # Just uncomment if you need to analyze indexes
-  #yti-codelist-kibana:
+  #yti-kibana:
   #  image: docker.elastic.co/kibana/kibana:6.5.4
   #  container_name: yti-kibana
   #  restart: always
   #  ports:
   #   - "5601:5601"
   #  environment:
-  #    ELASTICSEARCH_URL: http://yti-codelist-elasticsearch:9200
+  #    ELASTICSEARCH_URL: http://yti-elasticsearch:9200
   #  networks:
   #   - yti-network
 
-  #yti-terminology-kibana:
-  #  image: docker.elastic.co/kibana/kibana:6.5.4
-  #  container_name: yti-kibana
-  #  restart: always
-  #  ports:
-  #   - "5602:5601"
-  #  environment:
-  #    ELASTICSEARCH_URL: http://yti-terminology-elasticsearch:9200
-  #  networks:
-  #   - yti-network
-
-  #yti-datamodel-kibana:
-  #  image: docker.elastic.co/kibana/kibana:6.5.4
-  #  container_name: yti-kibana
-  #  restart: always
-  #  ports:
-  #   - "5603:5601"
-  #  environment:
-  #    ELASTICSEARCH_URL: http://yti-datamodel-elasticsearch:9200
-  #  networks:
-  #   - yti-network
+  # ELASTIC SEARCH
+  yti-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.22
+    container_name: yti-elasticsearch
+    restart: always
+    ports:
+      - "9200:9200"
+    environment:
+      - xpack.security.enabled=false
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - network.publish_host=127.0.0.1
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    networks:
+      - yti-network
 
   # POSTGRES
   yti-postgres:
@@ -135,23 +128,6 @@ services:
       - yti-network
 
   # CODELIST
-  yti-codelist-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.22
-    container_name: yti-codelist-elasticsearch
-    restart: always
-    ports:
-      - "9610:9200"
-    environment:
-      - xpack.security.enabled=false
-      - cluster.name=yti-codelist-elasticsearch
-      - http.host=0.0.0.0
-      - transport.host=0.0.0.0
-      - network.publish_host=127.0.0.1
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
-    networks:
-      - yti-network
-
   yti-codelist-ui:
     image: yti-codelist-ui:latest
     container_name: yti-codelist-ui
@@ -198,17 +174,17 @@ services:
       - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
       - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
       - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
-      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-content-intake-service.yml"
     command: -j -Xmx2048M
     depends_on:
       - yti-groupmanagement
-      - yti-codelist-elasticsearch
+      - yti-elasticsearch
       - yti-postgres
       - yti-keycloak
     links:
       - yti-groupmanagement
-      - yti-codelist-elasticsearch
+      - yti-elasticsearch
       - yti-postgres
       - yti-keycloak
     networks:
@@ -227,14 +203,14 @@ services:
     environment:
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-public-api-service.yml"
     command: -j -Xmx512M
     depends_on:
-      - yti-codelist-elasticsearch
+      - yti-elasticsearch
       - yti-keycloak
     links:
-      - yti-codelist-elasticsearch
+      - yti-elasticsearch
       - yti-keycloak
     networks:
       - yti-network
@@ -247,7 +223,7 @@ services:
     environment:
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-termed-api.yml"
     ports:
       - "9102:8080"
@@ -258,20 +234,6 @@ services:
       - yti-postgres
     links:
       - yti-postgres
-    networks:
-      - yti-network
-
-  yti-terminology-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.22
-    container_name: "yti-terminology-elasticsearch"
-    restart: always
-    ports:
-      - "9104:9200"
-    environment:
-      - xpack.security.enabled=false
-      - transport.host=127.0.0.1
-      - http.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     networks:
       - yti-network
 
@@ -292,20 +254,20 @@ services:
       - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
       - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
       - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
-      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml"
     depends_on:
       - yti-groupmanagement
-      - yti-terminology-elasticsearch
       - yti-terminology-termed-api
       - yti-postgres
+      - yti-elasticsearch
       - yti-activemq
       - yti-keycloak
     links:
       - yti-groupmanagement
-      - yti-terminology-elasticsearch
       - yti-terminology-termed-api
       - yti-postgres
+      - yti-elasticsearch
       - yti-activemq
       - yti-keycloak
     networks:
@@ -358,22 +320,6 @@ services:
       - yti-datamodel-api
       - yti-messaging-api
 
-  yti-datamodel-elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch:6.8.22"
-    container_name: "yti-datamodel-elasticsearch"
-    restart: always
-    ports:
-      - "9002:9200"
-    environment:
-      - xpack.security.enabled=false
-      - cluster.name=yti-datamodel-elasticsearch
-      - http.host=0.0.0.0
-      - network.publish_host=127.0.0.1
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    networks:
-      - yti-network
-
   yti-datamodel-api:
     image: "yti-datamodel-api:latest"
     container_name: "yti-datamodel-api"
@@ -396,13 +342,13 @@ services:
     depends_on:
       - yti-fuseki
       - yti-groupmanagement
-      - yti-datamodel-elasticsearch
+      - yti-elasticsearch
       - yti-terminology-termed-api
       - yti-keycloak
     links:
       - yti-fuseki
       - yti-groupmanagement
-      - yti-datamodel-elasticsearch
+      - yti-elasticsearch
       - yti-terminology-termed-api
       - yti-keycloak
     networks:
@@ -434,7 +380,7 @@ services:
       - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
       - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
       - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
-      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
     volumes:
       - ./config:/config
@@ -493,12 +439,12 @@ services:
       - ENVIRONMENT_MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}
       - ENVIRONMENT_MAIL_SMTP_STARTTLS_REQUIRED=${MAIL_SMTP_STARTTLS_REQUIRED}
       - ENVIRONMENT_ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
-      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
-      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
-      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
-      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
-      - "SPRING_PROFILES_ACTIVE=default,docker"
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_API_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_API_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_API_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_API_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_API_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-messaging-api.yml"
     volumes:
       - ./config:/config

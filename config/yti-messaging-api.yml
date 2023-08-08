@@ -151,7 +151,7 @@ application:
   port: ${server.port}
   contextPath: "/messaging-api"
   access-log: true
-  env: local
+  env: prod
 
 session:
   timeout-mins: 10
@@ -164,11 +164,11 @@ hikari:
   maximumPoolSize: 10
 
 impersonate:
-  allowed: true
+  allowed: false
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 admin:
   email: ${environment.admin.email}

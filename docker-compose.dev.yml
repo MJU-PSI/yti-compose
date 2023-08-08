@@ -83,14 +83,6 @@ services:
         - "traefik.http.routers.yti-keycloak.middlewares=strip-prefix-1,keycloak-strip-prefix"
         - "traefik.http.middlewares.keycloak-strip-prefix.stripprefix.prefixes=/keycloak"
 
-  # POSTGRES
-  yti-postgres:
-    container_name: yti-postgres
-
-  # ACTIVEMQ
-  yti-activemq:
-    container_name: yti-activemq
-
   # GROUPMANAGEMENT
   yti-groupmanagement:
     container_name: yti-groupmanagement
@@ -104,9 +96,6 @@ services:
         - "traefik.http.middlewares.groupmanagement-strip-prefix.stripprefix.prefixes=${GROUPMANAGEMENT_BASE_HREF}"
 
   # CODELIST
-  yti-codelist-elasticsearch:
-    container_name: yti-codelist-elasticsearch
-
   yti-codelist-ui:
     container_name: yti-codelist-ui
     deploy:
@@ -118,22 +107,7 @@ services:
         - "traefik.http.routers.yti-codelist.middlewares=strip-prefix-1,codelist-strip-prefix"
         - "traefik.http.middlewares.codelist-strip-prefix.stripprefix.prefixes=${CODELIST_BASE_HREF}"
 
-  yti-codelist-content-intake-service:
-    container_name: yti-codelist-content-intake-service
-
-  yti-codelist-public-api-service:
-    container_name: yti-codelist-public-api-service
-
   # TERMINOLOGY
-  yti-terminology-termed-api:
-    container_name: "yti-terminology-termed-api"
-
-  yti-terminology-elasticsearch:
-    container_name: "yti-terminology-elasticsearch"
-
-  yti-terminology-api:
-    container_name: "yti-terminology-api"
-
   yti-terminology-ui:
     container_name: "yti-terminology-ui"
     deploy:
@@ -157,19 +131,7 @@ services:
         - "traefik.http.routers.yti-datamodel.middlewares=strip-prefix-1,datamodel-stripprefix"
         - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
 
-  yti-datamodel-elasticsearch:
-    container_name: "yti-datamodel-elasticsearch"
-
-  yti-datamodel-api:
-    container_name: "yti-datamodel-api"
-
-  yti-fuseki:
-    container_name: "yti-fuseki"
-
   # COMMENTS
-  yti-comments-api:
-    container_name: "yti-comments-api"
-
   yti-comments-ui:
     container_name: "yti-comments-ui"
     deploy:
@@ -180,7 +142,3 @@ services:
         - "traefik.http.routers.yti-comments-ui.entrypoints=web"
         - "traefik.http.routers.yti-comments-ui.middlewares=strip-prefix-1,comments-strip-prefix"
         - "traefik.http.middlewares.comments-strip-prefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
-
-  # MESSAGING
-  yti-messaging-api:
-    container_name: "yti-messaging-api"

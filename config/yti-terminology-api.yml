@@ -30,11 +30,10 @@ api:
   user: admin
   pw: admin
 
-search:
-  host:
-    url: ${environment.terminology-elastic.host}
-    port: ${environment.terminology-elastic.port}
-    scheme: http
+elasticsearch:
+  scheme: ${environment.elasticsearch.scheme}
+  host: ${environment.elasticsearch.host}
+  port: ${environment.elasticsearch.port}
   index:
     name: concepts,vocabularies
     file: create_index_default.json
@@ -122,11 +121,10 @@ server:
     enabled: true
     mime-types: text/html,text/css,application/javascript,application/json
 
-search:
-  host:
-    url: ${environment.terminology-elastic.host}
-    port: ${environment.terminology-elastic.port}
-    scheme: http
+elasticsearch:
+  scheme: ${environment.elasticsearch.scheme}
+  host: ${environment.elasticsearch.host}
+  port: ${environment.elasticsearch.port}
   index:
     name: concepts,vocabularies
     file: create_index_default.json
@@ -165,10 +163,10 @@ services:
   groupManagementUrl: ${environment.groupmanagement.public-url}
   commentsUrl: ${environment.comments.public-url}
   messagingEnabled: ${environment.messaging.enabled}
-  env: docker
+  env: prod
 
 impersonate:
-  allowed: true
+  allowed: false
 
 migration:
   enabled: true
@@ -180,7 +178,7 @@ application:
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 uri:
   scheme: http

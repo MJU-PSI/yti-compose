@@ -79,9 +79,10 @@ hikari:
   minimumIdle: 20
   maximumPoolSize: 100
 
-yti_codelist_content_intake_service_elastic_host: ${environment.codelist-elastic.host}
-yti_codelist_content_intake_service_elastic_port: ${environment.codelist-elastic.port}
-yti_codelist_content_intake_service_elastic_cluster: ${environment.codelist-elastic.cluster}
+elasticsearch:
+  scheme: ${environment.elasticsearch.scheme}
+  host: ${environment.elasticsearch.host}
+  port: ${environment.elasticsearch.port}
 
 impersonate:
   allowed: true
@@ -132,7 +133,7 @@ application:
   contextPath: "/codelist-intake"
   access-log: true
   initializeContent: true
-  env: local
+  env: prod
   languages: ${environment.languages}
 
 frontend:
@@ -140,9 +141,9 @@ frontend:
   codeSchemeSortMode: "boostStatus"
 
 publicapi:
-  scheme: http
-  host: localhost
-  port: 9601
+  scheme: https
+  host: psi.gora.si/sifranti
+  port:
   contextPath: "/codelist-api"
 
 uri:
@@ -160,14 +161,14 @@ hikari:
   minimumIdle: 10
   maximumPoolSize: 10
 
-yti_codelist_content_intake_service_elastic_host: ${environment.codelist-elastic.host}
-yti_codelist_content_intake_service_elastic_port: ${environment.codelist-elastic.port}
-yti_codelist_content_intake_service_elastic_cluster: ${environment.codelist-elastic.cluster}
+elasticsearch:
+  scheme: ${environment.elasticsearch.scheme}
+  host: ${environment.elasticsearch.host}
+  port: ${environment.elasticsearch.port}
 
 impersonate:
-  allowed: true
+  allowed: false
 
 fake:
   login:
-    allowed: true
-
+    allowed: false

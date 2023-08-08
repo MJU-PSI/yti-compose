@@ -132,7 +132,7 @@ application:
   dataModelUrl: ${environment.datamodel.public-url}
   terminologyUrl: ${environment.terminology.public-url}
   commentsUrl: ${environment.comments.public-url}
-  env: local
+  env: prod
   messagingEnabled: ${environment.messaging.enabled}
 
 jwt:
@@ -140,7 +140,7 @@ jwt:
 
 fake:
   login:
-    allowed: true
+    allowed: false
 
 impersonate:
-  allowed: true
+  allowed: false
