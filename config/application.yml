@@ -38,6 +38,16 @@ environment:
     port: 5432
     username: postgres
     password: Jaz!Ti!On
+  mail:
+    host: host
+    port: 25
+    username: username
+    password: password
+    smtp:
+      auth: false
+      starttls:
+        enable: false
+        required: false
   codelist:
     public-host: localhost:9600
     #public-host: koodistot.dev.yti.cloud.vrk.fi
@@ -63,6 +73,8 @@ environment:
   messaging:
     url: http://localhost:9801
     enabled: true
+  admin:
+    email: "admin@localhost"
     
 keycloak:
   auth-server-url: http://localhost:8080/auth
@@ -145,6 +157,8 @@ environment:
   messaging:
     url: http://localhost:9801
     enabled: true
+  admin:
+    email: "admin@localhost"
  
 keycloak:
   auth-server-url: http://yti-keycloak:8080/auth
