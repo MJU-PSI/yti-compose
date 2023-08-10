@@ -44,6 +44,8 @@ services:
       - xpack.security.enabled=false
       - http.host=0.0.0.0
       - transport.host=0.0.0.0
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
       - network.publish_host=127.0.0.1
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
@@ -101,6 +103,8 @@ services:
       - ANGULAR_KEYCLOAK_REALM
       - ANGULAR_KEYCLOAK_CLIENT_ID
       - ANGULAR_BASE_HREF=${GROUPMANAGEMENT_BASE_HREF}
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - ENVIRONMENT_MAIL_HOST=${MAIL_HOST}
@@ -168,6 +172,8 @@ services:
     volumes:
       - ./config:/config
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
@@ -176,7 +182,7 @@ services:
       - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
       - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-content-intake-service.yml"
-    command: -j -Xmx2048M
+    command: -j -Xmx512M
     depends_on:
       - yti-groupmanagement
       - yti-elasticsearch
@@ -201,6 +207,8 @@ services:
       - ./config:/config
       - /data/logs/yti-codelist-api:/data/logs/yti-codelist-api:Z
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=docker"
@@ -221,6 +229,8 @@ services:
     container_name: "yti-terminology-termed-api"
     restart: always
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - "SPRING_PROFILES_ACTIVE=docker"
@@ -248,6 +258,8 @@ services:
       - ./config:/config:Z
       - /data/logs/yti-terminology-api:/data/logs/yti-terminology-api:Z
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
@@ -327,6 +339,8 @@ services:
       - "9001:9001"
       - "9004:9004"
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
@@ -374,6 +388,8 @@ services:
     ports:
       - "9701:9701"
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
@@ -385,7 +401,7 @@ services:
     volumes:
       - ./config:/config
       - /data/logs/yti-datamodel-api:/data/logs/yti-comments-api:Z
-    command: -j -Xmx2048M
+    command: -j -Xmx512M
     depends_on:
       - yti-postgres
       - yti-groupmanagement
@@ -429,6 +445,8 @@ services:
     ports:
       - "9801:9801"
     environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
       - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
       - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - ENVIRONMENT_MAIL_HOST=${MAIL_HOST}
@@ -449,7 +467,7 @@ services:
     volumes:
       - ./config:/config
       - /data/logs/yti-messaging-api:/data/logs/yti-messaging-api:Z
-    command: -j -Xmx2048M
+    command: -j -Xmx512M
     depends_on:
       - yti-postgres
       - yti-groupmanagement
