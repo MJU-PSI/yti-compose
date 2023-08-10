@@ -88,6 +88,12 @@ services:
         - "traefik.http.middlewares.keycloak-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.keycloak-redirect.redirectregex.permanent=true"
 
+  # ELASTIC SEARCH
+  yti-elasticsearch:
+    container_name: yti-elasticsearch
+    deploy:
+      endpoint_mode: dnsrr
+
   # GROUPMANAGEMENT
   yti-groupmanagement:
     container_name: yti-groupmanagement
