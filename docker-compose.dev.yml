@@ -7,7 +7,7 @@ services:
     image: traefik:v2.9
     container_name: traefik
     command:
-      - --log.level=DEBUG
+      - --log.level=INFO
       - --api.dashboard=true
       - --entrypoints.web.address=:80
       # - --entrypoints.websecure.address=:443
@@ -25,7 +25,7 @@ services:
         # Dashboard
         - "traefik.enable=true"
         # Change the host url here
-        - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`)"
+        - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `/traefik/`)"
         - "traefik.http.routers.traefik.service=api@internal"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
         #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
@@ -57,7 +57,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.portainer.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/portainer`)"
+        - "traefik.http.routers.portainer.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/portainer`) || HeadersRegexp(`Referer`, `/portainer/`)"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
         - "traefik.http.routers.portainer.entrypoints=web"
         - "traefik.http.routers.portainer.middlewares=portainer-stripprefix,portainer-redirect"
@@ -78,7 +78,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/keycloak`) || PathPrefix(`/auth`)"
+        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
         - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.yti-keycloak.entrypoints=web"
         - "traefik.http.routers.yti-keycloak.middlewares=keycloak-stripprefix,keycloak-redirect"
@@ -143,7 +143,7 @@ services:
         - "traefik.http.routers.yti-datamodel.entrypoints=web"
         - "traefik.http.routers.yti-datamodel.middlewares=datamodel-stripprefix,datamodel-redirect"
         - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
-        - "traefik.http.middlewares.datamodel-redirectredirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.datamodel-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.permanent=true"
 
