@@ -28,6 +28,8 @@ services:
         # Change the host url here
         - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `/traefik/`)"
         - "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+        #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
         - "traefik.http.routers.traefik.entrypoints=traefik"
         - "traefik.http.routers.traefik.middlewares=traefik-auth,traefik-stripprefix"
         - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_AUTH}"
