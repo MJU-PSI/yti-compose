@@ -357,13 +357,13 @@ services:
       - yti-fuseki
       - yti-groupmanagement
       - yti-elasticsearch
-      - yti-terminology-termed-api
+      - yti-terminology-api
       - yti-keycloak
     links:
       - yti-fuseki
       - yti-groupmanagement
       - yti-elasticsearch
-      - yti-terminology-termed-api
+      - yti-terminology-api
       - yti-keycloak
     networks:
       - yti-network
