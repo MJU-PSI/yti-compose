@@ -3,18 +3,16 @@ BRANCH=master
 GIT_REPO="https://github.com/MJU-PSI/"
 
 #Component list
-#Define gradle task with suffix <:publishToMavenLocal>
 COMPONENTS="
-yti-spring-security:publishToMavenLocal
-yti-spring-migration:publishToMavenLocal
-yti-common-ui:npmBuild
-yti-termed-api
-yti-codelist-common-model
 yti-docker-java-base
-yti-config-server
+yti-spring-security
+yti-spring-migration
+yti-common-ui
+yti-codelist-common-model
 yti-codelist-public-api-service
 yti-codelist-content-intake-service
 yti-codelist-ui
+yti-termed-api
 yti-terminology-termed-docker
 yti-terminology-api
 yti-terminology-ui
@@ -36,12 +34,6 @@ clone_component_from_git () {
     `git clone $1$2.git -b$3`
 }
 
-publish_component () {
-    cd $1
-    echo "Publishing $1 with task $2"
-    ./gradlew $2
-    cd ..
-}
 #Main
 #Where to fetch sources
 if [ $# -eq 1 ]
@@ -55,18 +47,9 @@ echo "Clone repositories"
 mkdir -p $BUILD_BASE
 cd $BUILD_BASE
 echo "Fetching components into the $BUILD_BASE"
-echo "Get components"
 for component in $COMPONENTS
 do
-    comp=$(echo $component | cut -f1 -d:)
-    task=$(echo $component | cut -f2 -s -d:)
-    clone_component_from_git $GIT_REPO $comp $BRANCH
-
-    if [ -n "$task" ]
-    then
-        echo "task=$task"
-        publish_component $comp $task
-    fi
+    clone_component_from_git $GIT_REPO $component $BRANCH
 done
 cd ..
 echo "YTI bootstrap done" 
