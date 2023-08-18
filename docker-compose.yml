@@ -236,7 +236,7 @@ services:
       - "SPRING_PROFILES_ACTIVE=docker"
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-termed-api.yml"
     ports:
-      - "9102:8080"
+      - "9102:9102"
     volumes:
       - ./config:/config:Z
       - /data/logs/yti-terminology-termed-api:/data/logs/yti-terminology-termed-api:Z

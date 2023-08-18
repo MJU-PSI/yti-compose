@@ -26,6 +26,7 @@ service:
   database-name: yti_terminology
 
 server:
+  port: 9102
   max-http-header-size: 10000000
 
 management:
@@ -79,6 +80,7 @@ service:
   database-name: yti_terminology
 
 server:
+  port: 9102
   max-http-header-size: 10000000
 
 management:

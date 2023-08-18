@@ -27,8 +27,8 @@ server:
 
 api:
   url: http://${environment.termed-api.host}:${environment.termed-api.port}/api
-  user: admin
-  pw: admin
+  username: ${environment.termed-api.username}
+  password: ${environment.termed-api.password}
 
 elasticsearch:
   scheme: ${environment.elasticsearch.scheme}
@@ -135,8 +135,8 @@ elasticsearch:
 
 api:
   url: http://${environment.termed-api.host}:${environment.termed-api.port}/api
-  user: admin
-  pw: admin
+  username: ${environment.termed-api.username}
+  password: ${environment.termed-api.password}
 
 groupmanagement:
   url: ${environment.groupmanagement.url}
