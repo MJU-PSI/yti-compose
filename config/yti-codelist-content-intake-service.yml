@@ -141,9 +141,9 @@ frontend:
   codeSchemeSortMode: "boostStatus"
 
 publicapi:
-  scheme: https
-  host: psi.gora.si/sifranti
-  port:
+  scheme: http
+  host: yti-codelist-ui
+  port: 80
   contextPath: "/codelist-api"
 
 uri:
