@@ -13,15 +13,8 @@ tomcat:
   ajp:
     port: 9604
 
-frontend:
-  scheme: http
-  host: localhost
-  port: 9600
-
 application:
-  scheme: http
-  host: localhost
-  port: ${server.port}
+  publicUrl: ${environment.codelist.public-url}
   contextPath: "/codelist-api"
   access-log: true
 
@@ -59,15 +52,8 @@ spring:
 server:
   port: 9601
 
-frontend:
-  scheme: http
-  host: localhost
-  port: 9600
-
 application:
-  scheme: http
-  host: localhost
-  port: ${server.port}
+  publicUrl: ${environment.codelist.public-url}
   contextPath: "/codelist-api"
   access-log: true
 
