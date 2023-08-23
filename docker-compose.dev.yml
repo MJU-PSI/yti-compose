@@ -91,6 +91,10 @@ services:
   # ELASTIC SEARCH
   yti-elasticsearch:
     container_name: yti-elasticsearch
+    ports:
+    - target: 9200
+      published: 9200
+      mode: host
     deploy:
       endpoint_mode: dnsrr
 
