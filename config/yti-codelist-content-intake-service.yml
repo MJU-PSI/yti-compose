@@ -41,6 +41,9 @@ datamodel:
 comments:
   publicUrl: ${environment.comments.public-url}
 
+codelist:
+  publicUrl: ${environment.codelist.public-url}
+
 messaging:
   enabled: ${environment.messaging.enabled}
 
@@ -57,12 +60,6 @@ application:
 frontend:
   defaultStatus: null
   codeSchemeSortMode: "boostStatus"
-
-publicapi:
-  scheme: http
-  host: localhost
-  port: 9601
-  contextPath: "/codelist-api"
 
 uri:
   scheme: http
@@ -123,6 +120,9 @@ datamodel:
 comments:
   publicUrl: ${environment.comments.public-url}
 
+codelist:
+  publicUrl: ${environment.codelist.public-url}/codelist-api
+
 messaging:
   enabled: ${environment.messaging.enabled}
 
@@ -139,12 +139,6 @@ application:
 frontend:
   defaultStatus: null
   codeSchemeSortMode: "boostStatus"
-
-publicapi:
-  scheme: http
-  host: yti-codelist-ui
-  port: 80
-  contextPath: "/codelist-api"
 
 uri:
   scheme: http
