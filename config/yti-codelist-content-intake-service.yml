@@ -121,7 +121,7 @@ comments:
   publicUrl: ${environment.comments.public-url}
 
 codelist:
-  publicUrl: ${environment.codelist.public-url}/codelist-api
+  publicUrl: ${environment.codelist.public-url}
 
 messaging:
   enabled: ${environment.messaging.enabled}
