@@ -1,0 +1,500 @@
+version: '3.9'
+
+services:
+  # KEYCLOAK
+  yti-keycloak:
+    image: "${REPO}/yti-keycloak:${TAG}"
+    restart: always
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - KEYCLOAK_USER
+      - KEYCLOAK_PASSWORD
+      - KEYCLOAK_FRONTEND_URL
+      - DB_VENDOR=${KEYCLOAK_DB_VENDOR}
+      - DB_ADDR=${KEYCLOAK_DB_ADDR}
+      - DB_PORT=${KEYCLOAK_DB_PORT}
+      - DB_DATABASE=${KEYCLOAK_DB_DATABASE}
+      - DB_USER=${KEYCLOAK_DB_USER}
+      - DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+    networks:
+      - yti-network
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/auth`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
+        - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
+        - "traefik.http.routers.yti-keycloak.entrypoints=web"
+        - "traefik.http.routers.yti-keycloak.middlewares=keycloak-stripprefix,keycloak-redirect"
+        - "traefik.http.middlewares.keycloak-stripprefix.stripprefix.prefixes=/keycloak"
+        - "traefik.http.middlewares.keycloak-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.keycloak-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.keycloak-redirect.redirectregex.permanent=true"
+
+  # ELASTIC SEARCH
+  yti-elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:6.8.22"
+    restart: always
+    ports:
+      - target: 9200
+        published: 9200
+        mode: host
+    deploy:
+      endpoint_mode: dnsrr
+    environment:
+      - xpack.security.enabled=false
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
+      - network.publish_host=127.0.0.1
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    networks:
+      - yti-network
+
+  # ACTIVEMQ
+  yti-activemq:
+    image: "${REPO}/yti-activemq:${TAG}"
+    restart: always
+    ports:
+      - "9900:8161"
+      - "9901:61616"
+    environment:
+      - "ARTEMIS_USERNAME=yti"
+      - "ARTEMIS_PASSWORD=test"
+      - "ARTEMIS_MIN_MEMORY=512M"
+      - "ARTEMIS_MAX_MEMORY=512M"
+    networks:
+      - yti-network
+
+  # GROUPMANAGEMENT
+  yti-groupmanagement:
+    image: "${REPO}/yti-groupmanagement:${TAG}"
+    restart: always
+    ports:
+      - "9302:9302"
+      - "9300:9300"
+    volumes:
+      - ./config:/config
+    environment:
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${GROUPMANAGEMENT_BASE_HREF}
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_MAIL_HOST=${MAIL_HOST}
+      - ENVIRONMENT_MAIL_PORT=${MAIL_PORT}
+      - ENVIRONMENT_MAIL_USERNAME=${MAIL_USERNAME}
+      - ENVIRONMENT_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ENVIRONMENT_MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_REQUIRED=${MAIL_SMTP_STARTTLS_REQUIRED}
+      - ENVIRONMENT_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
+    depends_on:
+      - yti-postgres
+      - yti-keycloak
+    links:
+      - yti-postgres
+      - yti-keycloak
+    networks:
+      - yti-network
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`)"
+        - "traefik.http.services.yti-groupmanagement.loadbalancer.server.port=9302"
+        - "traefik.http.routers.yti-groupmanagement.entrypoints=web"
+        - "traefik.http.routers.yti-groupmanagement.middlewares=groupmanagement-stripprefix,groupmanagement-redirect"
+        - "traefik.http.middlewares.groupmanagement-stripprefix.stripprefix.prefixes=${GROUPMANAGEMENT_BASE_HREF}"
+        - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.permanent=true"
+
+  # CODELIST
+  yti-codelist-ui:
+    image: "${REPO}/yti-codelist-ui:${TAG}"
+    restart: always
+    ports:
+      - "9600:80"
+    environment:
+      - CODELIST_API_URL
+      - CODELIST_INTAKE_URL
+      - TERMINOLOGY_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${CODELIST_BASE_HREF}
+    depends_on:
+      - yti-codelist-content-intake-service
+      - yti-codelist-public-api-service
+      - yti-messaging-api
+      - yti-terminology-api
+    links:
+      - yti-codelist-content-intake-service
+      - yti-codelist-public-api-service
+      - yti-messaging-api
+      - yti-terminology-api
+    networks:
+      - yti-network
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-codelist.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`)"
+        - "traefik.http.services.yti-codelist.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-codelist.entrypoints=web"
+        - "traefik.http.routers.yti-codelist.middlewares=codelist-stripprefix,codelist-redirect"
+        - "traefik.http.middlewares.codelist-stripprefix.stripprefix.prefixes=${CODELIST_BASE_HREF}"
+        - "traefik.http.middlewares.codelist-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.codelist-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.codelist-redirect.redirectregex.permanent=true"
+
+  yti-codelist-content-intake-service:
+    image: "${REPO}/yti-codelist-content-intake-service:${TAG}"
+    restart: always
+    ports:
+      - "9602:9602"
+      - "9603:9603"
+      - "19602:19602"
+    command: -j -Xmx512M
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-content-intake-service.yml"
+    volumes:
+      - ./config:/config
+    depends_on:
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-postgres
+      - yti-keycloak
+    links:
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-postgres
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  yti-codelist-public-api-service:
+    image: "${REPO}/yti-codelist-public-api-service:${TAG}"
+    restart: always
+    ports:
+      - "9601:9601"
+      - "19601:19601"
+    command: -j -Xmx512M
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-public-api-service.yml"
+    volumes:
+      - ./config:/config
+    depends_on:
+      - yti-elasticsearch
+      - yti-keycloak
+    links:
+      - yti-elasticsearch
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  # TERMINOLOGY
+  yti-terminology-termed-api:
+    image: "${REPO}/yti-terminology-termed-api:${TAG}"
+    restart: always
+    ports:
+      - "9102:9102"
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-termed-api.yml"
+    volumes:
+      - ./config:/config
+    depends_on:
+      - yti-postgres
+    links:
+      - yti-postgres
+    networks:
+      - yti-network
+
+  yti-terminology-api:
+    image: "${REPO}/yti-terminology-api:${TAG}"
+    restart: always
+    ports:
+      - "9101:9101"
+      - "9103:9103"
+    volumes:
+      - ./config:/config
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml"
+    depends_on:
+      - yti-groupmanagement
+      - yti-terminology-termed-api
+      - yti-postgres
+      - yti-elasticsearch
+      - yti-activemq
+      - yti-keycloak
+    links:
+      - yti-groupmanagement
+      - yti-terminology-termed-api
+      - yti-postgres
+      - yti-elasticsearch
+      - yti-activemq
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  yti-terminology-ui:
+    image: "${REPO}/yti-terminology-ui:${TAG}"
+    restart: always
+    ports:
+      - "9100:80"
+    environment:
+      - TERMINOLOGY_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${TERMINOLOGY_BASE_HREF}
+    depends_on:
+      - yti-terminology-api
+      - yti-messaging-api
+    links:
+      - yti-terminology-api
+      - yti-messaging-api
+    networks:
+      - yti-network
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-terminology.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`)"
+        - "traefik.http.services.yti-terminology.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-terminology.entrypoints=web"
+        - "traefik.http.routers.yti-terminology.middlewares=terminology-stripprefix,terminology-redirect"
+        - "traefik.http.middlewares.terminology-stripprefix.stripprefix.prefixes=${TERMINOLOGY_BASE_HREF}"
+        - "traefik.http.middlewares.terminology-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.terminology-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.terminology-redirect.redirectregex.permanent=true"
+
+  # DATAMODEL
+  yti-datamodel-ui:
+    image: "${REPO}/yti-datamodel-ui:${TAG}"
+    ports:
+      - "9000:80"
+    environment:
+      - DATAMODEL_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_DATAMODEL_DOMAIN
+      - ANGULAR_BASE_HREF=${DATAMODEL_BASE_HREF}
+    networks:
+      - yti-network
+    depends_on:
+      - yti-datamodel-api
+      - yti-messaging-api
+    links:
+      - yti-datamodel-api
+      - yti-messaging-api
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-datamodel.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`)"
+        - "traefik.http.services.yti-datamodel.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-datamodel.entrypoints=web"
+        - "traefik.http.routers.yti-datamodel.middlewares=datamodel-stripprefix,datamodel-redirect"
+        - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
+        - "traefik.http.middlewares.datamodel-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.datamodel-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.datamodel-redirect.redirectregex.permanent=true"
+
+  yti-datamodel-api:
+    image: "${REPO}/yti-datamodel-api:${TAG}"
+    ports:
+      - "9001:9001"
+      - "9004:9004"
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml"
+    volumes:
+      - ./config:/config
+    depends_on:
+      - yti-fuseki
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-terminology-api
+      - yti-keycloak
+    links:
+      - yti-fuseki
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-terminology-api
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  yti-fuseki:
+    image: "${REPO}/yti-fuseki:${TAG}"
+    restart: always
+    ports:
+      - "3030:3030"
+    volumes:
+      - /nfs/psi/fuseki:/fuseki/databases
+    networks:
+      - yti-network
+
+  # COMMENTS
+  yti-comments-api:
+    image: "${REPO}/yti-comments-api:${TAG}"
+    ports:
+      - "9701:9701"
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
+    volumes:
+      - ./config:/config
+    command: -j -Xmx512M
+    depends_on:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    links:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  yti-comments-ui:
+    image: "${REPO}/yti-comments-ui:${TAG}"
+    ports:
+      - "9700:80"
+    environment:
+      - COMMENTS_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${COMMENTS_BASE_HREF}
+    depends_on:
+      - yti-comments-api
+      - yti-messaging-api
+    links:
+      - yti-comments-api
+      - yti-messaging-api
+    networks:
+      - yti-network
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-comments-ui.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
+        - "traefik.http.services.yti-comments-ui.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-comments-ui.entrypoints=web"
+        - "traefik.http.routers.yti-comments-ui.middlewares=comments-stripprefix,comments-redirect"
+        - "traefik.http.middlewares.comments-stripprefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
+        - "traefik.http.middlewares.comments-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.comments-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.comments-redirect.redirectregex.permanent=true"
+
+  # MESSAGING
+  yti-messaging-api:
+    image: "${REPO}/yti-messaging-api:${TAG}"
+    restart: always
+    ports:
+      - "9801:9801"
+    command: -j -Xmx512M
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_MAIL_HOST=${MAIL_HOST}
+      - ENVIRONMENT_MAIL_PORT=${MAIL_PORT}
+      - ENVIRONMENT_MAIL_USERNAME=${MAIL_USERNAME}
+      - ENVIRONMENT_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ENVIRONMENT_MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_REQUIRED=${MAIL_SMTP_STARTTLS_REQUIRED}
+      - ENVIRONMENT_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_API_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_API_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_API_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_API_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_API_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-messaging-api.yml"
+    volumes:
+      - ./config:/config
+    depends_on:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    links:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    networks:
+      - yti-network
+
+networks:
+  yti-network:
