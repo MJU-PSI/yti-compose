@@ -38,9 +38,9 @@ publicDatamodelFrontend: ${environment.datamodel.public-url}
 defaultLanguage: ${environment.defaultLanguage}
 
 uri:
-  scheme: http
-  host: iow.gora.si
-  contextPath: /datamodel/ns/
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/datamodel/ns"
 
 provenance: true
 
@@ -101,9 +101,9 @@ publicDatamodelFrontend: ${environment.datamodel.public-url}
 defaultLanguage: sl
 
 uri:
-  scheme: http
-  host: iow.gora.si
-  contextPath: /datamodel/ns/
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/datamodel/ns"
   
 provenance: true
 

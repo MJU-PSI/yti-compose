@@ -62,8 +62,8 @@ frontend:
   codeSchemeSortMode: "boostStatus"
 
 uri:
-  scheme: http
-  host: iow.gora.si
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
   contextPath: "/codelist"
 
 session:
@@ -141,8 +141,8 @@ frontend:
   codeSchemeSortMode: "boostStatus"
 
 uri:
-  scheme: http
-  host: iow.gora.si
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
   contextPath: "/codelist"
 
 session:

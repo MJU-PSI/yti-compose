@@ -17,9 +17,18 @@ thread:
     max: 50
     min: 10
 
+logging:
+  level:
+    root: INFO
+  pattern:
+    console: "%-30(%d{dd.MM.yyyy HH:mm:ss.SSS} %marker) %-5level \\(%logger{36}:%line\\) - %msg%n"
+
 environment:
   languages: sl,en
   defaultLanguage: sl
+  uri:
+    scheme: http
+    host: iow.gora.si
   elasticsearch:
     scheme: http
     host: 127.0.0.1
@@ -109,9 +118,18 @@ thread:
     max: 50
     min: 10
 
+logging:
+  level:
+    root: INFO
+  pattern:
+    console: "%-30(%d{dd.MM.yyyy HH:mm:ss.SSS} %marker) %-5level \\(%logger{36}:%line\\) - %msg%n"
+
 environment:
   languages: sl,en
   defaultLanguage: sl
+  uri:
+    scheme: http
+    host: iow.gora.si
   elasticsearch:
     scheme: http
     host: yti-elasticsearch

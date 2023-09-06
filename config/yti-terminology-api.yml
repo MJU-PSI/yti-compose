@@ -83,16 +83,17 @@ application:
 fake:
   login:
     allowed: true
-    
+
 uri:
-  scheme: http
-  host: iow.gora.si
-  contextPath: /terminology
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/terminology"
   
 datamodel:
   uri: 
-    scheme: http
-    host: iow.gora.si
+    scheme: ${environment.uri.scheme}
+    host: ${environment.uri.host}
+    contextPath: "/datamodel/ns"
 
 ---
 spring:
@@ -181,11 +182,12 @@ fake:
     allowed: false
 
 uri:
-  scheme: http
-  host: iow.gora.si
-  contextPath: /terminology
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/terminology"
  
 datamodel:
   uri: 
-    scheme: http
-    host: iow.gora.si
+    scheme: ${environment.uri.scheme}
+    host: ${environment.uri.host}
+    contextPath: "/datamodel/ns"

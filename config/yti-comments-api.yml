@@ -59,21 +59,15 @@ messaging:
   enabled: ${environment.messaging.enabled}
 
 application:
-  scheme: http
-  host: localhost
-  port: ${server.port}
+  publicUrl: ${environment.comments.public-url}
   contextPath: "/comments-api"
   access-log: true
   env: local
 
-frontend:
-  scheme: http
-  host: localhost
-  port: 9700
-
 uri:
-  scheme: http
-  host: iow.gora.si
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/comments"
 
 session:
   timeout-mins: 10
@@ -144,21 +138,15 @@ messaging:
   enabled: ${environment.messaging.enabled}
 
 application:
-  scheme: https
-  host: psi.gora.si/komentarji
-  port: 
+  publicUrl: ${environment.comments.public-url}
   contextPath: "/comments-api"
   access-log: true
   env: prod
 
-frontend:
-  scheme: https
-  host: psi.gora.si/komentarji
-  port: 
-
 uri:
-  scheme: http
-  host: iow.gora.si
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/comments"
 
 session:
   timeout-mins: 10

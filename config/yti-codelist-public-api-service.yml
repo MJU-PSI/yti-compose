@@ -38,8 +38,9 @@ elasticsearch:
   port: ${environment.elasticsearch.port}
 
 uri:
-  scheme: http
-  host: iow.gora.si
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/codelist"
 
 ---
 spring:
@@ -77,5 +78,6 @@ elasticsearch:
   port: ${environment.elasticsearch.port}
 
 uri:
-  scheme: http
-  host: iow.gora.si
+  scheme: ${environment.uri.scheme}
+  host: ${environment.uri.host}
+  contextPath: "/codelist"

@@ -44,12 +44,12 @@ fi:
         rdfs: http://www.w3.org/2000/01/rdf-schema#
         owl: http://www.w3.org/2002/07/owl#
         skos: http://www.w3.org/2004/02/skos/core#
-        ts: http://iow.gora.si/datamodel/ns/st#
+        ts: http://uri.suomi.fi/datamodel/ns/st#
         skosxl: http://www.w3.org/2008/05/skos-xl#
         dcterms: http://purl.org/dc/terms/
         dc: http://purl.org/dc/elements/1.1/
         vs: http://www.w3.org/2003/06/sw-vocab-status/ns#
-        iow: http://iow.gora.si/datamodel/ns/iow#
+        iow: http://uri.suomi.fi/datamodel/ns/iow#
         ptvl: http://urn.fi/URN:NBN:fi:au:ptvl/
 
 ---
@@ -98,10 +98,10 @@ fi:
         rdfs: http://www.w3.org/2000/01/rdf-schema#
         owl: http://www.w3.org/2002/07/owl#
         skos: http://www.w3.org/2004/02/skos/core#
-        ts: http://iow.gora.si/datamodel/ns/st#
+        ts: http://uri.suomi.fi/datamodel/ns/st#
         skosxl: http://www.w3.org/2008/05/skos-xl#
         dcterms: http://purl.org/dc/terms/
         dc: http://purl.org/dc/elements/1.1/
         vs: http://www.w3.org/2003/06/sw-vocab-status/ns#
-        iow: http://iow.gora.si/datamodel/ns/iow#
+        iow: http://uri.suomi.fi/datamodel/ns/iow#
         ptvl: http://urn.fi/URN:NBN:fi:au:ptvl/

@@ -32,10 +32,6 @@ tomcat:
   ajp:
     port: 9300
 
-logging:
-  level:
-    fi.vm.yti: DEBUG
-
 registration:
   url: https://id.eduuni.fi/signup?returnUrl=https://yhteentoimiva.suomi.fi
 
@@ -106,10 +102,6 @@ server:
 tomcat:
   ajp:
     port: 9300
-
-logging:
-  level:
-    fi.vm.yti: DEBUG
 
 registration:
   url: https://id.eduuni.fi/signup?returnUrl=https://yhteentoimiva.suomi.fi
