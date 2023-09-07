@@ -162,6 +162,12 @@ services:
         - "traefik.http.middlewares.codelist-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.codelist-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.codelist-redirect.redirectregex.permanent=true"
+        - "traefik.http.routers.yti-codelist-2.rule=Host(`${URI_HOST}`) && PathPrefix(`/codelist`)"
+        - "traefik.http.routers.yti-codelist-2.middlewares=codelist-2-redirect"
+        - "traefik.http.routers.yti-codelist-2.entrypoints=web"
+        - "traefik.http.middlewares.codelist-2-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)"
+        - "traefik.http.middlewares.codelist-2-redirect.redirectregex.replacement=http://${PROJECT_DOMAIN}${CODELIST_BASE_HREF}/codelist-api/api/v1/uris/redirect/?uri=$${1}"
+        - "traefik.http.middlewares.codelist-2-redirect.redirectregex.permanent=false"
 
   yti-codelist-content-intake-service:
     image: "${REPO}/yti-codelist-content-intake-service:${TAG}"
@@ -321,6 +327,12 @@ services:
         - "traefik.http.middlewares.terminology-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.terminology-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.terminology-redirect.redirectregex.permanent=true"
+        - "traefik.http.routers.yti-terminology-2.rule=Host(`${URI_HOST}`) && PathPrefix(`/terminology`)"
+        - "traefik.http.routers.yti-terminology-2.middlewares=terminology-2-redirect"
+        - "traefik.http.routers.yti-terminology-2.entrypoints=web"
+        - "traefik.http.middlewares.terminology-2-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)"
+        - "traefik.http.middlewares.terminology-2-redirect.redirectregex.replacement=http://${PROJECT_DOMAIN}${TERMINOLOGY_BASE_HREF}/terminology-api/api/v1/resolve/?uri=$${1}"
+        - "traefik.http.middlewares.terminology-2-redirect.redirectregex.permanent=false"
 
   # DATAMODEL
   yti-datamodel-ui:
@@ -354,6 +366,12 @@ services:
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.permanent=true"
+        - "traefik.http.routers.yti-datamodel-2.rule=Host(`${URI_HOST}`) && PathPrefix(`/datamodel`)"
+        - "traefik.http.routers.yti-datamodel-2.middlewares=datamodel-2-redirect"
+        - "traefik.http.routers.yti-datamodel-2.entrypoints=web"
+        - "traefik.http.middlewares.datamodel-2-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)"
+        - "traefik.http.middlewares.datamodel-2-redirect.redirectregex.replacement=http://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}/datamodel-api/api/v1/resolve/?uri=$${1}"
+        - "traefik.http.middlewares.datamodel-2-redirect.redirectregex.permanent=false"
 
   yti-datamodel-api:
     image: "${REPO}/yti-datamodel-api:${TAG}"
@@ -457,14 +475,20 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-comments-ui.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
-        - "traefik.http.services.yti-comments-ui.loadbalancer.server.port=80"
-        - "traefik.http.routers.yti-comments-ui.entrypoints=web"
-        - "traefik.http.routers.yti-comments-ui.middlewares=comments-stripprefix,comments-redirect"
+        - "traefik.http.routers.yti-comments.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
+        - "traefik.http.services.yti-comments.loadbalancer.server.port=80"
+        - "traefik.http.routers.yti-comments.entrypoints=web"
+        - "traefik.http.routers.yti-comments.middlewares=comments-stripprefix,comments-redirect"
         - "traefik.http.middlewares.comments-stripprefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
         - "traefik.http.middlewares.comments-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.comments-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.comments-redirect.redirectregex.permanent=true"
+        - "traefik.http.routers.yti-comments-2.rule=Host(`${URI_HOST}`) && PathPrefix(`/comments`)"
+        - "traefik.http.routers.yti-comments-2.middlewares=comments-2-redirect"
+        - "traefik.http.routers.yti-comments-2.entrypoints=web"
+        - "traefik.http.middlewares.comments-2-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)"
+        - "traefik.http.middlewares.comments-2-redirect.redirectregex.replacement=http://${PROJECT_DOMAIN}${COMMENTS_BASE_HREF}/comments-api/api/v1/uris/redirect/?uri=$${1}"
+        - "traefik.http.middlewares.comments-2-redirect.redirectregex.permanent=false"
 
   # MESSAGING
   yti-messaging-api:
