@@ -35,7 +35,7 @@ services:
 
   # ELASTIC SEARCH
   yti-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.22
+    image: yti-elasticsearch:latest
     container_name: yti-elasticsearch
     restart: always
     ports:

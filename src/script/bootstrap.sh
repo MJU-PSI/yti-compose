@@ -26,6 +26,7 @@ yti-messaging-api
 yti-activemq
 yti-postgres
 yti-keycloak
+yti-elasticsearch
 "
 
 #clone given repository from git with given branch or master

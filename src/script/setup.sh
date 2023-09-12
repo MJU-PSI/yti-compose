@@ -26,6 +26,7 @@ yti-messaging-api
 yti-activemq
 yti-postgres
 yti-keycloak
+yti-elasticsearch
 "
 
 pull_component_from_git () {
