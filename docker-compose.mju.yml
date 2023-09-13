@@ -23,14 +23,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/auth`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
+        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/auth`)"
         - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.yti-keycloak.entrypoints=web"
-        - "traefik.http.routers.yti-keycloak.middlewares=keycloak-stripprefix,keycloak-redirect"
-        - "traefik.http.middlewares.keycloak-stripprefix.stripprefix.prefixes=/keycloak"
-        - "traefik.http.middlewares.keycloak-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.keycloak-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.keycloak-redirect.redirectregex.permanent=true"
 
   # ELASTIC SEARCH
   yti-elasticsearch:
