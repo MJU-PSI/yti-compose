@@ -157,6 +157,12 @@ services:
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.datamodel-redirect.redirectregex.permanent=true"
+        - "traefik.http.routers.yti-datamodel-default.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/`)"
+        - "traefik.http.routers.yti-datamodel-default.middlewares=datamodel-default-redirect"
+        - "traefik.http.routers.yti-datamodel-default.entrypoints=web"
+        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.regex=.*"
+        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.replacement=https://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}"
+        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.permanent=false"
 
   # COMMENTS
   yti-comments-ui:

@@ -367,6 +367,12 @@ services:
         - "traefik.http.middlewares.datamodel-2-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)"
         - "traefik.http.middlewares.datamodel-2-redirect.redirectregex.replacement=http://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}/datamodel-api/api/v1/resolve/?uri=$${1}"
         - "traefik.http.middlewares.datamodel-2-redirect.redirectregex.permanent=false"
+        - "traefik.http.routers.yti-datamodel-default.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/`)"
+        - "traefik.http.routers.yti-datamodel-default.middlewares=datamodel-default-redirect"
+        - "traefik.http.routers.yti-datamodel-default.entrypoints=web"
+        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.regex=.*"
+        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.replacement=https://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}"
+        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.permanent=false"
 
   yti-datamodel-api:
     image: "${REPO}/yti-datamodel-api:${TAG}"
