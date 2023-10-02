@@ -1,11 +1,9 @@
-# This file overrides docker-compose.yml with settings for DEV environment
 version: '3.9'
 
 services:
   # TRAEFIK
   traefik:
     image: traefik:v2.9
-    container_name: traefik
     command:
       - --log.level=INFO
       - --api.dashboard=true
@@ -17,7 +15,7 @@ services:
       - --providers.docker.network=${PROJECT_NAME}_yti-network
     ports:
       - "80:80"
-      - "9080:8080"
+      - "8080:8080"
       # - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -28,7 +26,7 @@ services:
         # Change the host url here
         - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `/traefik/`)"
         - "traefik.http.routers.traefik.service=api@internal"
-        - "traefik.http.services.traefik.loadbalancer.server.port=9080"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
         #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
         - "traefik.http.routers.traefik.entrypoints=web"
         - "traefik.http.routers.traefik.middlewares=traefik-auth,traefik-stripprefix"
@@ -75,7 +73,26 @@ services:
 
   # KEYCLOAK
   yti-keycloak:
-    container_name: yti-keycloak
+    image: yti-keycloak:latest
+    volumes:
+      - ./config:/config
+    environment:
+      - KEYCLOAK_USER
+      - KEYCLOAK_PASSWORD
+      - KEYCLOAK_FRONTEND_URL
+      - KEYCLOAK_HTTP_RELATIVE_PATH
+      - DB_VENDOR=${KEYCLOAK_DB_VENDOR}
+      - DB_ADDR=${KEYCLOAK_DB_ADDR}
+      - DB_PORT=${KEYCLOAK_DB_PORT}
+      - DB_DATABASE=${KEYCLOAK_DB_DATABASE}
+      - DB_USER=${KEYCLOAK_DB_USER}
+      - DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+    depends_on:
+      - yti-postgres
+    links:
+      - yti-postgres
+    networks:
+      - yti-network
     deploy:
       labels:
         - "traefik.enable=true"
@@ -90,17 +107,85 @@ services:
 
   # ELASTIC SEARCH
   yti-elasticsearch:
-    container_name: yti-elasticsearch
+    image: yti-elasticsearch:latest
+    environment:
+      - xpack.security.enabled=false
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
+      - network.publish_host=127.0.0.1
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    networks:
+      - yti-network
+
+  # POSTGRES
+  yti-postgres:
+    image: yti-postgres:latest
     ports:
-    - target: 9200
-      published: 9200
-      mode: host
-    deploy:
-      endpoint_mode: dnsrr
+      - "5432:5432"
+    volumes:
+      - /data/logs/yti-postgres:/data/logs:Z
+      - /data/postgres/data:/var/lib/postgresql/data
+    command: postgres -c logging_collector=on -c log_directory=/data/logs -c max_connections=250
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    networks:
+      - yti-network
+
+  # ACTIVEMQ
+  yti-activemq:
+    image: yti-activemq:latest
+    volumes:
+      - /data/logs/yti-activemq:/var/lib/artemis/log:z
+    environment:
+      - "ARTEMIS_USERNAME=yti"
+      - "ARTEMIS_PASSWORD=test"
+      - "ARTEMIS_MIN_MEMORY=512M"
+      - "ARTEMIS_MAX_MEMORY=512M"
+    networks:
+      - yti-network
 
   # GROUPMANAGEMENT
   yti-groupmanagement:
-    container_name: yti-groupmanagement
+    image: yti-groupmanagement:latest
+    volumes:
+      - ./config:/config
+    environment:
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${GROUPMANAGEMENT_BASE_HREF}
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_MAIL_HOST=${MAIL_HOST}
+      - ENVIRONMENT_MAIL_PORT=${MAIL_PORT}
+      - ENVIRONMENT_MAIL_USERNAME=${MAIL_USERNAME}
+      - ENVIRONMENT_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ENVIRONMENT_MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_REQUIRED=${MAIL_SMTP_STARTTLS_REQUIRED}
+      - ENVIRONMENT_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-groupmanagement.yml"
+    depends_on:
+      - yti-postgres
+      - yti-keycloak
+    links:
+      - yti-postgres
+      - yti-keycloak
+    networks:
+      - yti-network
     deploy:
       labels:
         - "traefik.enable=true"
@@ -115,7 +200,29 @@ services:
 
   # CODELIST
   yti-codelist-ui:
-    container_name: yti-codelist-ui
+    image: yti-codelist-ui:latest
+    environment:
+      - CODELIST_API_URL
+      - CODELIST_INTAKE_URL
+      - TERMINOLOGY_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${CODELIST_BASE_HREF}
+    depends_on:
+      - yti-codelist-content-intake-service
+      - yti-codelist-public-api-service
+      - yti-messaging-api
+      - yti-terminology-api
+    links:
+      - yti-codelist-content-intake-service
+      - yti-codelist-public-api-service
+      - yti-messaging-api
+      - yti-terminology-api
+    networks:
+      - yti-network
     deploy:
       labels:
         - "traefik.enable=true"
@@ -128,9 +235,137 @@ services:
         - "traefik.http.middlewares.codelist-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.codelist-redirect.redirectregex.permanent=true"
 
+  yti-codelist-content-intake-service:
+    image: yti-codelist-content-intake-service:latest
+    command: -j -Xmx512M
+    volumes:
+      - ./config:/config
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - ENVIRONMENT_URI_SCHEME=${URI_SCHEME}
+      - ENVIRONMENT_URI_HOST=${URI_HOST}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-content-intake-service.yml"
+    depends_on:
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-postgres
+      - yti-keycloak
+    links:
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-postgres
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  yti-codelist-public-api-service:
+    image: yti-codelist-public-api-service:latest
+    command: -j -Xmx512M
+    volumes:
+      - ./config:/config
+      - /data/logs/yti-codelist-api:/data/logs:Z
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_URI_SCHEME=${URI_SCHEME}
+      - ENVIRONMENT_URI_HOST=${URI_HOST}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-codelist-public-api-service.yml"
+    depends_on:
+      - yti-elasticsearch
+      - yti-keycloak
+    links:
+      - yti-elasticsearch
+      - yti-keycloak
+    networks:
+      - yti-network
+
   # TERMINOLOGY
+  yti-terminology-termed-api:
+    image: yti-terminology-termed-api:latest
+    volumes:
+      - ./config:/config:Z
+      - /data/logs/yti-terminology-termed-api:/data/logs:Z
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-termed-api.yml"
+    depends_on:
+      - yti-postgres
+    links:
+      - yti-postgres
+    networks:
+      - yti-network
+
+  yti-terminology-api:
+    image: yti-terminology-api:latest
+    volumes:
+      - ./config:/config:Z
+      - /data/logs/yti-terminology-api:/data/logs:Z
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_URI_SCHEME=${URI_SCHEME}
+      - ENVIRONMENT_URI_HOST=${URI_HOST}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-terminology-api.yml"
+    depends_on:
+      - yti-groupmanagement
+      - yti-terminology-termed-api
+      - yti-postgres
+      - yti-elasticsearch
+      - yti-activemq
+      - yti-keycloak
+    links:
+      - yti-groupmanagement
+      - yti-terminology-termed-api
+      - yti-postgres
+      - yti-elasticsearch
+      - yti-activemq
+      - yti-keycloak
+    networks:
+      - yti-network
+
   yti-terminology-ui:
-    container_name: "yti-terminology-ui"
+    image: yti-terminology-ui:latest
+    environment:
+      - TERMINOLOGY_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${TERMINOLOGY_BASE_HREF}
+    depends_on:
+      - yti-terminology-api
+      - yti-messaging-api
+    links:
+      - yti-terminology-api
+      - yti-messaging-api
+    networks:
+      - yti-network
     deploy:
       labels:
         - "traefik.enable=true"
@@ -145,7 +380,23 @@ services:
 
   # DATAMODEL
   yti-datamodel-ui:
-    container_name: "yti-datamodel-ui"
+    image: yti-datamodel-ui:latest
+    environment:
+      - DATAMODEL_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${DATAMODEL_BASE_HREF}
+    networks:
+      - yti-network
+    depends_on:
+      - yti-datamodel-api
+      - yti-messaging-api
+    links:
+      - yti-datamodel-api
+      - yti-messaging-api
     deploy:
       labels:
         - "traefik.enable=true"
@@ -164,9 +415,102 @@ services:
         - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.replacement=https://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}"
         - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.permanent=false"
 
+  yti-datamodel-api:
+    image: yti-datamodel-api:latest
+    volumes:
+      - ./config:/config:Z
+      - /data/logs/yti-datamodel-api:/data/logs:Z
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - ENVIRONMENT_URI_SCHEME=${URI_SCHEME}
+      - ENVIRONMENT_URI_HOST=${URI_HOST}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-datamodel-api.yml"
+    depends_on:
+      - yti-fuseki
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-codelist-public-api-service
+      - yti-terminology-api
+      - yti-keycloak
+    links:
+      - yti-fuseki
+      - yti-groupmanagement
+      - yti-elasticsearch
+      - yti-codelist-public-api-service
+      - yti-terminology-api
+      - yti-keycloak
+    networks:
+      - yti-network
+
+  yti-fuseki:
+    image: yti-fuseki:latest
+    volumes:
+      - /data/logs/yti-fuseki:/fuseki/logs:Z
+      - /data/fuseki:/fuseki/databases
+    networks:
+      - yti-network
+
   # COMMENTS
+  yti-comments-api:
+    image: yti-comments-api:latest
+    command: -j -Xmx512M
+    volumes:
+      - ./config:/config
+      - /data/logs/yti-datamodel-api:/data/logs:Z
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_PUBLIC_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_PUBLIC_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_PUBLIC_URL}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_PUBLIC_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_PUBLIC_URL}
+      - ENVIRONMENT_URI_SCHEME=${URI_SCHEME}
+      - ENVIRONMENT_URI_HOST=${URI_HOST}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
+    depends_on:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    links:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    networks:
+      - yti-network
+
   yti-comments-ui:
-    container_name: "yti-comments-ui"
+    image: yti-comments-ui:latest
+    volumes:
+      - /data/logs/yti-datamodel-api:/data/logs:Z
+    environment:
+      - COMMENTS_API_URL
+      - MESSAGING_API_URL
+      - ANGULAR_PRODUCTION
+      - ANGULAR_KEYCLOAK_URL
+      - ANGULAR_KEYCLOAK_REALM
+      - ANGULAR_KEYCLOAK_CLIENT_ID
+      - ANGULAR_BASE_HREF=${COMMENTS_BASE_HREF}
+    depends_on:
+      - yti-comments-api
+      - yti-messaging-api
+    links:
+      - yti-comments-api
+      - yti-messaging-api
+    networks:
+      - yti-network
     deploy:
       labels:
         - "traefik.enable=true"
@@ -178,3 +522,44 @@ services:
         - "traefik.http.middlewares.comments-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
         - "traefik.http.middlewares.comments-redirect.redirectregex.replacement=$${1}/"
         - "traefik.http.middlewares.comments-redirect.redirectregex.permanent=true"
+
+  # MESSAGING
+  yti-messaging-api:
+    image: yti-messaging-api:latest
+    command: -j -Xmx512M
+    volumes:
+      - ./config:/config
+      - /data/logs/yti-messaging-api:/data/logs:Z
+    environment:
+      - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
+      - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
+      - ENVIRONMENT_POSTGRES_USERNAME=${POSTGRES_USER}
+      - ENVIRONMENT_POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENVIRONMENT_MAIL_HOST=${MAIL_HOST}
+      - ENVIRONMENT_MAIL_PORT=${MAIL_PORT}
+      - ENVIRONMENT_MAIL_USERNAME=${MAIL_USERNAME}
+      - ENVIRONMENT_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - ENVIRONMENT_MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}
+      - ENVIRONMENT_MAIL_SMTP_STARTTLS_REQUIRED=${MAIL_SMTP_STARTTLS_REQUIRED}
+      - ENVIRONMENT_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ENVIRONMENT_CODELIST_PUBLICURL=${CODELIST_API_URL}
+      - ENVIRONMENT_COMMENTS_PUBLICURL=${COMMENTS_API_URL}
+      - ENVIRONMENT_TERMINOLOGY_PUBLICURL=${TERMINOLOGY_API_URL}
+      - ENVIRONMENT_DATAMODEL_PUBLICURL=${DATAMODEL_API_URL}
+      - ENVIRONMENT_GROUPMANAGEMENT_PUBLICURL=${GROUPMANAGEMENT_API_URL}
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-messaging-api.yml"
+    depends_on:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    links:
+      - yti-postgres
+      - yti-groupmanagement
+      - yti-keycloak
+    networks:
+      - yti-network
+
+networks:
+  yti-network:
