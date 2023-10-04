@@ -109,14 +109,13 @@ services:
   yti-elasticsearch:
     image: yti-elasticsearch:latest
     environment:
-      - xpack.security.enabled=false
-      - http.host=0.0.0.0
-      - transport.host=0.0.0.0
       - network.host=0.0.0.0
-      - network.bind_host=0.0.0.0
-      - network.publish_host=127.0.0.1
       - discovery.type=single-node
+      - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    deploy:
+      mode: global
+      endpoint_mode: dnsrr
     networks:
       - yti-network
 

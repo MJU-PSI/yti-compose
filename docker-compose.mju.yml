@@ -4,10 +4,6 @@ services:
   # KEYCLOAK
   yti-keycloak:
     image: "${REPO}/yti-keycloak:${TAG}"
-    restart: always
-    ports:
-      - "8080:8080"
-      - "8443:8443"
     environment:
       - KEYCLOAK_USER
       - KEYCLOAK_PASSWORD
@@ -30,32 +26,20 @@ services:
   # ELASTIC SEARCH
   yti-elasticsearch:
     image: "${REPO}/yti-elasticsearch:${TAG}"
-    restart: always
-    ports:
-      - target: 9200
-        published: 9200
-        mode: host
-    deploy:
-      endpoint_mode: dnsrr
     environment:
-      - xpack.security.enabled=false
-      - http.host=0.0.0.0
-      - transport.host=0.0.0.0
       - network.host=0.0.0.0
-      - network.bind_host=0.0.0.0
-      - network.publish_host=127.0.0.1
       - discovery.type=single-node
+      - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    deploy:
+      mode: global
+      endpoint_mode: dnsrr
     networks:
       - yti-network
 
   # ACTIVEMQ
   yti-activemq:
     image: "${REPO}/yti-activemq:${TAG}"
-    restart: always
-    ports:
-      - "9900:8161"
-      - "9901:61616"
     environment:
       - "ARTEMIS_USERNAME=yti"
       - "ARTEMIS_PASSWORD=test"
@@ -67,10 +51,6 @@ services:
   # GROUPMANAGEMENT
   yti-groupmanagement:
     image: "${REPO}/yti-groupmanagement:${TAG}"
-    restart: always
-    ports:
-      - "9302:9302"
-      - "9300:9300"
     volumes:
       - ./config:/config
     environment:
@@ -121,9 +101,6 @@ services:
   # CODELIST
   yti-codelist-ui:
     image: "${REPO}/yti-codelist-ui:${TAG}"
-    restart: always
-    ports:
-      - "9600:80"
     environment:
       - CODELIST_API_URL
       - CODELIST_INTAKE_URL
@@ -166,11 +143,6 @@ services:
 
   yti-codelist-content-intake-service:
     image: "${REPO}/yti-codelist-content-intake-service:${TAG}"
-    restart: always
-    ports:
-      - "9602:9602"
-      - "9603:9603"
-      - "19602:19602"
     command: -j -Xmx512M
     environment:
       - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
@@ -203,10 +175,6 @@ services:
 
   yti-codelist-public-api-service:
     image: "${REPO}/yti-codelist-public-api-service:${TAG}"
-    restart: always
-    ports:
-      - "9601:9601"
-      - "19601:19601"
     command: -j -Xmx512M
     environment:
       - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
@@ -232,9 +200,6 @@ services:
   # TERMINOLOGY
   yti-terminology-termed-api:
     image: "${REPO}/yti-terminology-termed-api:${TAG}"
-    restart: always
-    ports:
-      - "9102:9102"
     environment:
       - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
       - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
@@ -253,10 +218,6 @@ services:
 
   yti-terminology-api:
     image: "${REPO}/yti-terminology-api:${TAG}"
-    restart: always
-    ports:
-      - "9101:9101"
-      - "9103:9103"
     volumes:
       - ./config:/config
     environment:
@@ -292,9 +253,6 @@ services:
 
   yti-terminology-ui:
     image: "${REPO}/yti-terminology-ui:${TAG}"
-    restart: always
-    ports:
-      - "9100:80"
     environment:
       - TERMINOLOGY_API_URL
       - MESSAGING_API_URL
@@ -332,8 +290,6 @@ services:
   # DATAMODEL
   yti-datamodel-ui:
     image: "${REPO}/yti-datamodel-ui:${TAG}"
-    ports:
-      - "9000:80"
     environment:
       - DATAMODEL_API_URL
       - MESSAGING_API_URL
@@ -376,9 +332,7 @@ services:
 
   yti-datamodel-api:
     image: "${REPO}/yti-datamodel-api:${TAG}"
-    ports:
-      - "9001:9001"
-      - "9004:9004"
+    command: -j -Dhttp.proxyHost='proxy.gov.si' -Dhttp.proxyPort='80' -Dhttps.proxyHost='proxy.gov.si' -Dhttps.proxyPort='80' -Dhttp.nonProxyHosts='localhost|127.0.0.1|*.gov.si|*.sigov.si|yti*'
     environment:
       - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
       - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
@@ -412,9 +366,6 @@ services:
 
   yti-fuseki:
     image: "${REPO}/yti-fuseki:${TAG}"
-    restart: always
-    ports:
-      - "3030:3030"
     volumes:
       - /nfs/psi/fuseki:/fuseki/databases
     networks:
@@ -423,8 +374,7 @@ services:
   # COMMENTS
   yti-comments-api:
     image: "${REPO}/yti-comments-api:${TAG}"
-    ports:
-      - "9701:9701"
+    command: -j -Xmx512M
     environment:
       - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
       - ENVIRONMENT_POSTGRES_PORT=${POSTGRES_PORT}
@@ -441,7 +391,6 @@ services:
       - "SPRING_CONFIG_LOCATION=/config/application.yml,/config/yti-comments-api.yml"
     volumes:
       - ./config:/config
-    command: -j -Xmx512M
     depends_on:
       - yti-postgres
       - yti-groupmanagement
@@ -455,8 +404,6 @@ services:
 
   yti-comments-ui:
     image: "${REPO}/yti-comments-ui:${TAG}"
-    ports:
-      - "9700:80"
     environment:
       - COMMENTS_API_URL
       - MESSAGING_API_URL
@@ -494,9 +441,6 @@ services:
   # MESSAGING
   yti-messaging-api:
     image: "${REPO}/yti-messaging-api:${TAG}"
-    restart: always
-    ports:
-      - "9801:9801"
     command: -j -Xmx512M
     environment:
       - ENVIRONMENT_POSTGRES_HOST=${POSTGRES_HOST}
