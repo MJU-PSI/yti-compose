@@ -113,6 +113,8 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    volumes:
+      - /data/elasticsearch:/usr/share/elasticsearch/data
     deploy:
       mode: global
       endpoint_mode: dnsrr
