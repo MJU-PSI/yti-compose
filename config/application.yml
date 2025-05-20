@@ -28,7 +28,7 @@ environment:
   defaultLanguage: sl
   uri:
     scheme: http
-    host: iow.gora.si
+    host: localhost
   elasticsearch:
     scheme: http
     host: 127.0.0.1
@@ -48,7 +48,7 @@ environment:
     host: 127.0.0.1
     port: 5432
     username: postgres
-    password: Jaz!Ti!On
+    password: postgres
   mail:
     host: host
     port: 25
@@ -129,7 +129,7 @@ environment:
   defaultLanguage: sl
   uri:
     scheme: http
-    host: iow.gora.si
+    host: localhost
   elasticsearch:
     scheme: http
     host: yti-elasticsearch
