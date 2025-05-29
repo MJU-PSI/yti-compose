@@ -1,4 +1,4 @@
-version: "3.9"
+name: psi
 
 services:
   # TRAEFIK
@@ -8,72 +8,62 @@ services:
       - --log.level=INFO
       - --api.dashboard=true
       - --entrypoints.web.address=:80
-      # - --entrypoints.websecure.address=:443
+      #- --entrypoints.websecure.address=:443
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.swarmmode=true
-      - --providers.docker.network=${PROJECT_NAME}_yti-network
     ports:
       - "80:80"
-      - "8080:8080"
-      # - "443:443"
+      #- "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    deploy:
-      labels:
-        # Dashboard
-        - "traefik.enable=true"
-        # Change the host url here
-        - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `/traefik/`)"
-        - "traefik.http.routers.traefik.service=api@internal"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-        #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
-        - "traefik.http.routers.traefik.entrypoints=web"
-        - "traefik.http.routers.traefik.middlewares=traefik-auth,traefik-stripprefix"
-        - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_AUTH}"
-        - "traefik.http.middlewares.traefik-stripprefix.stripprefix.prefixes=/traefik"
+    labels:
+      # Dashboard
+      - "traefik.enable=true"
+      # Change the host url here
+      - "traefik.http.routers.traefik.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `/traefik/`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      #- "traefik.http.routers.traefik.tls.certresolver=leresolver"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth,traefik-stripprefix"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_AUTH}"
+      - "traefik.http.middlewares.traefik-stripprefix.stripprefix.prefixes=/traefik"
     networks:
       - yti-network
 
   # PORTAINER
   agent:
     image: portainer/agent
+    environment:
+      - AGENT_CLUSTER_ADDR=agent
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
-    deploy:
-      mode: global
-      placement:
-        constraints: [node.platform.os == linux]
     networks:
       - yti-network
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify --admin-password '${PORTAINER_PASSWORD}'
+    command: -H tcp://agent:9001 --tlsskipverify --admin-password '${PORTAINER_PASSWORD}'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.portainer.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/portainer`) || HeadersRegexp(`Referer`, `/portainer/`)"
-        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-        - "traefik.http.routers.portainer.entrypoints=web"
-        - "traefik.http.routers.portainer.middlewares=portainer-stripprefix,portainer-redirect"
-        - "traefik.http.middlewares.portainer-stripprefix.stripprefix.prefixes=/portainer"
-        - "traefik.http.middlewares.portainer-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.portainer-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.portainer-redirect.redirectregex.permanent=true"
-
-      mode: replicated
-      placement:
-        constraints: [node.role == manager]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/portainer`) || HeadersRegexp(`Referer`, `/portainer/`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.routers.portainer.middlewares=portainer-stripprefix,portainer-redirect"
+      - "traefik.http.middlewares.portainer-stripprefix.stripprefix.prefixes=/portainer"
+      - "traefik.http.middlewares.portainer-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.portainer-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.portainer-redirect.redirectregex.permanent=true"
     networks:
       - yti-network
 
   # KEYCLOAK
   yti-keycloak:
     image: yti-keycloak:latest
+    container_name: yti-keycloak
     volumes:
       - ./config:/config
     environment:
@@ -93,21 +83,21 @@ services:
       - yti-postgres
     networks:
       - yti-network
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
-        - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
-        - "traefik.http.routers.yti-keycloak.entrypoints=web"
-        - "traefik.http.routers.yti-keycloak.middlewares=keycloak-stripprefix,keycloak-redirect"
-        - "traefik.http.middlewares.keycloak-stripprefix.stripprefix.prefixes=/keycloak"
-        - "traefik.http.middlewares.keycloak-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.keycloak-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.keycloak-redirect.redirectregex.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-keycloak.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/keycloak`) || HeadersRegexp(`Referer`, `/keycloak/`) || PathPrefix(`/auth`)"
+      - "traefik.http.services.yti-keycloak.loadbalancer.server.port=8080"
+      - "traefik.http.routers.yti-keycloak.entrypoints=web"
+      - "traefik.http.routers.yti-keycloak.middlewares=keycloak-stripprefix,keycloak-redirect"
+      - "traefik.http.middlewares.keycloak-stripprefix.stripprefix.prefixes=/keycloak"
+      - "traefik.http.middlewares.keycloak-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.keycloak-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.keycloak-redirect.redirectregex.permanent=true"
 
   # ELASTIC SEARCH
   yti-elasticsearch:
     image: yti-elasticsearch:latest
+    container_name: yti-elasticsearch
     environment:
       - network.host=0.0.0.0
       - discovery.type=single-node
@@ -115,15 +105,13 @@ services:
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     volumes:
       - /data/elasticsearch:/usr/share/elasticsearch/data
-    deploy:
-      mode: global
-      endpoint_mode: dnsrr
     networks:
       - yti-network
 
   # POSTGRES
   yti-postgres:
     image: yti-postgres:latest
+    container_name: yti-postgres
     ports:
       - "5432:5432"
     volumes:
@@ -139,6 +127,7 @@ services:
   # ACTIVEMQ
   yti-activemq:
     image: yti-activemq:latest
+    container_name: yti-activemq
     volumes:
       - /data/logs/yti-activemq:/var/lib/artemis/log:z
     environment:
@@ -152,6 +141,7 @@ services:
   # GROUPMANAGEMENT
   yti-groupmanagement:
     image: yti-groupmanagement:latest
+    container_name: yti-groupmanagement
     volumes:
       - ./config:/config
     environment:
@@ -187,21 +177,21 @@ services:
       - yti-keycloak
     networks:
       - yti-network
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-groupmanagement.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`)"
-        - "traefik.http.services.yti-groupmanagement.loadbalancer.server.port=9302"
-        - "traefik.http.routers.yti-groupmanagement.entrypoints=web"
-        - "traefik.http.routers.yti-groupmanagement.middlewares=groupmanagement-stripprefix,groupmanagement-redirect"
-        - "traefik.http.middlewares.groupmanagement-stripprefix.stripprefix.prefixes=${GROUPMANAGEMENT_BASE_HREF}"
-        - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-groupmanagement.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${GROUPMANAGEMENT_BASE_HREF}`)"
+      - "traefik.http.services.yti-groupmanagement.loadbalancer.server.port=9302"
+      - "traefik.http.routers.yti-groupmanagement.entrypoints=web"
+      - "traefik.http.routers.yti-groupmanagement.middlewares=groupmanagement-stripprefix,groupmanagement-redirect"
+      - "traefik.http.middlewares.groupmanagement-stripprefix.stripprefix.prefixes=${GROUPMANAGEMENT_BASE_HREF}"
+      - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.groupmanagement-redirect.redirectregex.permanent=true"
 
   # CODELIST
   yti-codelist-ui:
     image: yti-codelist-ui:latest
+    container_name: yti-codelist-ui
     environment:
       - CODELIST_API_URL
       - CODELIST_INTAKE_URL
@@ -224,20 +214,20 @@ services:
       - yti-terminology-api
     networks:
       - yti-network
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-codelist.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`)"
-        - "traefik.http.services.yti-codelist.loadbalancer.server.port=80"
-        - "traefik.http.routers.yti-codelist.entrypoints=web"
-        - "traefik.http.routers.yti-codelist.middlewares=codelist-stripprefix,codelist-redirect"
-        - "traefik.http.middlewares.codelist-stripprefix.stripprefix.prefixes=${CODELIST_BASE_HREF}"
-        - "traefik.http.middlewares.codelist-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.codelist-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.codelist-redirect.redirectregex.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-codelist.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${CODELIST_BASE_HREF}`)"
+      - "traefik.http.services.yti-codelist.loadbalancer.server.port=80"
+      - "traefik.http.routers.yti-codelist.entrypoints=web"
+      - "traefik.http.routers.yti-codelist.middlewares=codelist-stripprefix,codelist-redirect"
+      - "traefik.http.middlewares.codelist-stripprefix.stripprefix.prefixes=${CODELIST_BASE_HREF}"
+      - "traefik.http.middlewares.codelist-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.codelist-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.codelist-redirect.redirectregex.permanent=true"
 
   yti-codelist-content-intake-service:
     image: yti-codelist-content-intake-service:latest
+    container_name: yti-codelist-content-intake-service
     command: -j -Xmx512M
     volumes:
       - ./config:/config
@@ -270,6 +260,7 @@ services:
 
   yti-codelist-public-api-service:
     image: yti-codelist-public-api-service:latest
+    container_name: yti-codelist-public-api-service
     command: -j -Xmx512M
     volumes:
       - ./config:/config
@@ -296,6 +287,8 @@ services:
   # TERMINOLOGY
   yti-terminology-termed-api:
     image: yti-terminology-termed-api:latest
+    container_name: yti-terminology-termed-api
+    restart: always
     volumes:
       - ./config:/config:Z
       - /data/logs/yti-terminology-termed-api:/data/logs:Z
@@ -315,6 +308,7 @@ services:
 
   yti-terminology-api:
     image: yti-terminology-api:latest
+    container_name: yti-terminology-api
     volumes:
       - ./config:/config:Z
       - /data/logs/yti-terminology-api:/data/logs:Z
@@ -351,6 +345,7 @@ services:
 
   yti-terminology-ui:
     image: yti-terminology-ui:latest
+    container_name: yti-terminology-ui
     environment:
       - TERMINOLOGY_API_URL
       - MESSAGING_API_URL
@@ -367,21 +362,21 @@ services:
       - yti-messaging-api
     networks:
       - yti-network
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-terminology.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`)"
-        - "traefik.http.services.yti-terminology.loadbalancer.server.port=80"
-        - "traefik.http.routers.yti-terminology.entrypoints=web"
-        - "traefik.http.routers.yti-terminology.middlewares=terminology-stripprefix,terminology-redirect"
-        - "traefik.http.middlewares.terminology-stripprefix.stripprefix.prefixes=${TERMINOLOGY_BASE_HREF}"
-        - "traefik.http.middlewares.terminology-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.terminology-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.terminology-redirect.redirectregex.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-terminology.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${TERMINOLOGY_BASE_HREF}`)"
+      - "traefik.http.services.yti-terminology.loadbalancer.server.port=80"
+      - "traefik.http.routers.yti-terminology.entrypoints=web"
+      - "traefik.http.routers.yti-terminology.middlewares=terminology-stripprefix,terminology-redirect"
+      - "traefik.http.middlewares.terminology-stripprefix.stripprefix.prefixes=${TERMINOLOGY_BASE_HREF}"
+      - "traefik.http.middlewares.terminology-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.terminology-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.terminology-redirect.redirectregex.permanent=true"
 
   # DATAMODEL
   yti-datamodel-ui:
     image: yti-datamodel-ui:latest
+    container_name: yti-datamodel-ui
     environment:
       - DATAMODEL_API_URL
       - MESSAGING_API_URL
@@ -398,26 +393,26 @@ services:
     links:
       - yti-datamodel-api
       - yti-messaging-api
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-datamodel.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`)"
-        - "traefik.http.services.yti-datamodel.loadbalancer.server.port=80"
-        - "traefik.http.routers.yti-datamodel.entrypoints=web"
-        - "traefik.http.routers.yti-datamodel.middlewares=datamodel-stripprefix,datamodel-redirect"
-        - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
-        - "traefik.http.middlewares.datamodel-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.datamodel-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.datamodel-redirect.redirectregex.permanent=true"
-        - "traefik.http.routers.yti-datamodel-default.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/`)"
-        - "traefik.http.routers.yti-datamodel-default.middlewares=datamodel-default-redirect"
-        - "traefik.http.routers.yti-datamodel-default.entrypoints=web"
-        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.regex=.*"
-        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.replacement=https://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}"
-        - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.permanent=false"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-datamodel.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${DATAMODEL_BASE_HREF}`)"
+      - "traefik.http.services.yti-datamodel.loadbalancer.server.port=80"
+      - "traefik.http.routers.yti-datamodel.entrypoints=web"
+      - "traefik.http.routers.yti-datamodel.middlewares=datamodel-stripprefix,datamodel-redirect"
+      - "traefik.http.middlewares.datamodel-stripprefix.stripprefix.prefixes=${DATAMODEL_BASE_HREF}"
+      - "traefik.http.middlewares.datamodel-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.datamodel-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.datamodel-redirect.redirectregex.permanent=true"
+      - "traefik.http.routers.yti-datamodel-default.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.yti-datamodel-default.middlewares=datamodel-default-redirect"
+      - "traefik.http.routers.yti-datamodel-default.entrypoints=web"
+      - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.regex=.*"
+      - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.replacement=https://${PROJECT_DOMAIN}${DATAMODEL_BASE_HREF}"
+      - "traefik.http.middlewares.datamodel-default-redirect.redirectregex.permanent=false"
 
   yti-datamodel-api:
     image: yti-datamodel-api:latest
+    container_name: yti-datamodel-api
     volumes:
       - ./config:/config:Z
       - /data/logs/yti-datamodel-api:/data/logs:Z
@@ -454,26 +449,28 @@ services:
 
   yti-fuseki:
     image: yti-fuseki:latest
+    container_name: yti-fuseki
+    restart: always
     volumes:
       - /data/logs/yti-fuseki:/fuseki/logs:Z
       - /data/fuseki:/fuseki/databases
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-fuseki.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/fuseki`) || HeadersRegexp(`Referer`, `/fuseki/`)"
-        - "traefik.http.services.yti-fuseki.loadbalancer.server.port=3030"
-        - "traefik.http.routers.yti-fuseki.entrypoints=web"
-        - "traefik.http.routers.yti-fuseki.middlewares=fuseki-stripprefix,fuseki-redirect"
-        - "traefik.http.middlewares.fuseki-stripprefix.stripprefix.prefixes=/fuseki"
-        - "traefik.http.middlewares.fuseki-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.fuseki-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.fuseki-redirect.redirectregex.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-fuseki.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/fuseki`) || HeadersRegexp(`Referer`, `/fuseki/`)"
+      - "traefik.http.services.yti-fuseki.loadbalancer.server.port=3030"
+      - "traefik.http.routers.yti-fuseki.entrypoints=web"
+      - "traefik.http.routers.yti-fuseki.middlewares=fuseki-stripprefix,fuseki-redirect"
+      - "traefik.http.middlewares.fuseki-stripprefix.stripprefix.prefixes=/fuseki"
+      - "traefik.http.middlewares.fuseki-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.fuseki-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.fuseki-redirect.redirectregex.permanent=true"
     networks:
       - yti-network
 
   # COMMENTS
   yti-comments-api:
     image: yti-comments-api:latest
+    container_name: yti-comments-api
     command: -j -Xmx512M
     volumes:
       - ./config:/config
@@ -505,6 +502,7 @@ services:
 
   yti-comments-ui:
     image: yti-comments-ui:latest
+    container_name: yti-comments-ui
     volumes:
       - /data/logs/yti-datamodel-api:/data/logs:Z
     environment:
@@ -523,22 +521,23 @@ services:
       - yti-messaging-api
     networks:
       - yti-network
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.yti-comments.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
-        - "traefik.http.services.yti-comments.loadbalancer.server.port=80"
-        - "traefik.http.routers.yti-comments.entrypoints=web"
-        - "traefik.http.routers.yti-comments.middlewares=comments-stripprefix,comments-redirect"
-        - "traefik.http.middlewares.comments-stripprefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
-        - "traefik.http.middlewares.comments-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
-        - "traefik.http.middlewares.comments-redirect.redirectregex.replacement=$${1}/"
-        - "traefik.http.middlewares.comments-redirect.redirectregex.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.yti-comments.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`${COMMENTS_BASE_HREF}`)"
+      - "traefik.http.services.yti-comments.loadbalancer.server.port=80"
+      - "traefik.http.routers.yti-comments.entrypoints=web"
+      - "traefik.http.routers.yti-comments.middlewares=comments-stripprefix,comments-redirect"
+      - "traefik.http.middlewares.comments-stripprefix.stripprefix.prefixes=${COMMENTS_BASE_HREF}"
+      - "traefik.http.middlewares.comments-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+      - "traefik.http.middlewares.comments-redirect.redirectregex.replacement=$${1}/"
+      - "traefik.http.middlewares.comments-redirect.redirectregex.permanent=true"
 
   # MESSAGING
   yti-messaging-api:
     image: yti-messaging-api:latest
+    container_name: yti-messaging-api
     command: -j -Xmx512M
+    restart: always
     volumes:
       - ./config:/config
       - /data/logs/yti-messaging-api:/data/logs:Z

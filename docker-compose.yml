@@ -1,3 +1,4 @@
+name: psi
 # ---------------------------------------------------------------------------------------
 # Postgres
 # YTI Fuseki
@@ -16,10 +17,7 @@
 # YTI Comments - UI
 # ---------------------------------------------------------------------------------------
 
-version: '3.9'
-
 services:
-
   # KIBANA
   # Just uncomment if you need to analyze indexes
   #yti-kibana:
