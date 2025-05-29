@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   # TRAEFIK
@@ -44,7 +44,7 @@ services:
     deploy:
       mode: global
       placement:
-        constraints: [ node.platform.os == linux ]
+        constraints: [node.platform.os == linux]
     networks:
       - yti-network
 
@@ -67,7 +67,7 @@ services:
 
       mode: replicated
       placement:
-        constraints: [ node.role == manager ]
+        constraints: [node.role == manager]
     networks:
       - yti-network
 
@@ -457,6 +457,17 @@ services:
     volumes:
       - /data/logs/yti-fuseki:/fuseki/logs:Z
       - /data/fuseki:/fuseki/databases
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.yti-fuseki.rule=Host(`${PROJECT_DOMAIN}`) && PathPrefix(`/fuseki`) || HeadersRegexp(`Referer`, `/fuseki/`)"
+        - "traefik.http.services.yti-fuseki.loadbalancer.server.port=3030"
+        - "traefik.http.routers.yti-fuseki.entrypoints=web"
+        - "traefik.http.routers.yti-fuseki.middlewares=fuseki-stripprefix,fuseki-redirect"
+        - "traefik.http.middlewares.fuseki-stripprefix.stripprefix.prefixes=/fuseki"
+        - "traefik.http.middlewares.fuseki-redirect.redirectregex.regex=^(https?://[^/]+/[a-z0-9_-]+)$$"
+        - "traefik.http.middlewares.fuseki-redirect.redirectregex.replacement=$${1}/"
+        - "traefik.http.middlewares.fuseki-redirect.redirectregex.permanent=true"
     networks:
       - yti-network
 
